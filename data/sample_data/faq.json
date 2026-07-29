@@ -1,0 +1,182 @@
+[
+  {
+    "id": "FAQ-001",
+    "question": "How do I apply for campaigns?",
+    "answer": "You can apply for campaigns through your Creator Dashboard. Navigate to 'Available Campaigns', browse through the listed opportunities, and click 'Apply' on campaigns that match your niche and audience. Your application will be reviewed by our team within 2-3 business days.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-002",
+    "question": "What documents do I need for onboarding?",
+    "answer": "For onboarding, you need to provide: 1. Government-issued ID (Aadhaar, PAN, or Passport), 2. Bank account details for payments, 3. Valid social media account links, 4. A brief portfolio or media kit (optional but recommended), 5. Tax information (PAN card).",
+    "category": "onboarding"
+  },
+  {
+    "id": "FAQ-003",
+    "question": "When will I receive payment for completed campaigns?",
+    "answer": "Payments are processed within 15-30 business days after campaign completion and deliverable approval. All payments are made via bank transfer (NEFT/IMPS). You will receive a payment confirmation email once the transfer is initiated.",
+    "category": "payments"
+  },
+  {
+    "id": "FAQ-004",
+    "question": "How do I update my profile information?",
+    "answer": "You can update your profile information from the Profile Settings section in your dashboard. Changes to niche, language, or social media links are reviewed by our team within 24 hours. Basic information like name and contact details can be updated immediately.",
+    "category": "profile"
+  },
+  {
+    "id": "FAQ-005",
+    "question": "What is the minimum follower requirement to join?",
+    "answer": "There is no strict minimum follower requirement. We evaluate creators based on content quality, engagement rate, niche relevance, and audience authenticity. However, most campaigns typically require 10,000+ followers on at least one platform.",
+    "category": "onboarding"
+  },
+  {
+    "id": "FAQ-006",
+    "question": "How are creators matched with campaigns?",
+    "answer": "Creators are matched with campaigns based on multiple factors: niche alignment, language compatibility, audience demographics, engagement rates, content quality scores, and past campaign performance. Our AI-powered system suggests the best matches, which are then reviewed by our Creator Success team.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-007",
+    "question": "Can I work with multiple brands simultaneously?",
+    "answer": "Yes, you can work with multiple brands simultaneously as long as there are no direct conflicts of interest (e.g., competing brands in the same category). We recommend maintaining a balanced content mix to keep your audience engaged. Please disclose all brand partnerships in your content.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-008",
+    "question": "How do I track my campaign deliverables?",
+    "answer": "You can track all your campaign deliverables from the 'My Campaigns' section in your dashboard. It shows pending deliverables, deadlines, submission status, and approval status. You'll also receive email reminders for upcoming deadlines.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-009",
+    "question": "What happens if I miss a campaign deadline?",
+    "answer": "Missing a deadline may affect your creator rating and eligibility for future campaigns. If you anticipate a delay, please inform your Creator Success manager at least 48 hours before the deadline. Repeated delays may result in account suspension.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-010",
+    "question": "How do I get my content reviewed?",
+    "answer": "Submit your content through the campaign dashboard before the publishing date. Our team reviews it within 24-48 hours for brand guideline compliance, quality, and messaging accuracy. You'll receive feedback and approval status via notification and email.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-011",
+    "question": "What are the content quality guidelines?",
+    "answer": "Content should be: 1. High resolution (1080p minimum for video), 2. Well-lit and properly framed, 3. Authentic and relatable to your usual style, 4. Properly disclosing brand partnership (#ad or #sponsored), 5. Free from offensive or controversial material, 6. Aligned with the campaign brief provided.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-012",
+    "question": "How do I change my bank account details?",
+    "answer": "You can update your bank account details from the Payment Settings section. Changes are subject to verification and may take 3-5 business days to process. A confirmation email will be sent to your registered email address once verified.",
+    "category": "payments"
+  },
+  {
+    "id": "FAQ-013",
+    "question": "What is the tax deduction process?",
+    "answer": "We deduct TDS (Tax Deducted at Source) as per applicable tax laws. The rate depends on your PAN card registration and total earnings. You will receive a TDS certificate (Form 16A) annually for tax filing purposes. Please ensure your PAN is linked to your account.",
+    "category": "payments"
+  },
+  {
+    "id": "FAQ-014",
+    "question": "I forgot my password. How do I reset it?",
+    "answer": "Click on 'Forgot Password' on the login page. Enter your registered email address, and we'll send you a password reset link. The link is valid for 24 hours. If you don't receive the email, check your spam folder or contact support.",
+    "category": "general"
+  },
+  {
+    "id": "FAQ-015",
+    "question": "How long does the onboarding process take?",
+    "answer": "The standard onboarding process takes 5-7 business days from the date of application. This includes document verification, profile review, and account activation. Complex cases with incomplete documentation may take longer.",
+    "category": "onboarding"
+  },
+  {
+    "id": "FAQ-016",
+    "question": "Can I promote my own products alongside brand campaigns?",
+    "answer": "Yes, you can promote your own products as long as it doesn't conflict with active brand campaigns. Ensure your own promotions don't overshadow or contradict brand messaging. Discuss with your Creator Success manager if you're unsure about potential conflicts.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-017",
+    "question": "How do I report an issue with a campaign?",
+    "answer": "Report campaign issues through the Help & Support section in your dashboard or contact your dedicated Creator Success manager directly. Please provide campaign ID, issue description, and any supporting screenshots. Our team aims to resolve issues within 48 hours.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-018",
+    "question": "What engagement rate is considered good?",
+    "answer": "An engagement rate of 1-3% is average, 3-5% is good, and 5%+ is excellent. Engagement rate varies by platform and niche. We consider overall performance rather than just the rate. Consistent engagement is valued over sporadic high engagement.",
+    "category": "onboarding"
+  },
+  {
+    "id": "FAQ-019",
+    "question": "Do I need to share analytics with brands?",
+    "answer": "Yes, for most campaigns you'll need to share post-campaign analytics including reach, impressions, engagement, and click-through rates (if applicable). This helps brands measure campaign effectiveness and helps us build stronger cases for you in future campaigns.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-020",
+    "question": "How can I increase my chances of being selected for campaigns?",
+    "answer": "To increase your chances: 1. Keep your profile 100% complete with updated information, 2. Maintain consistent content quality and posting schedule, 3. Engage actively with your audience, 4. Complete all assigned campaigns successfully, 5. Build a strong portfolio across different campaign types, 6. Maintain high engagement rates.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-021",
+    "question": "What payment methods are supported?",
+    "answer": "We support bank transfers (NEFT/IMGS) to all major Indian banks. International creators can receive payments via PayPal or wire transfer. Minimum payout threshold is Rs. 1,000 for domestic and $50 for international creators.",
+    "category": "payments"
+  },
+  {
+    "id": "FAQ-022",
+    "question": "How do I delete my account?",
+    "answer": "To delete your account, go to Account Settings and click 'Deactivate Account'. Your account will be deactivated immediately, and permanently deleted after 30 days. You can reactivate within this period by logging in. Pending payments will still be processed after deactivation.",
+    "category": "general"
+  },
+  {
+    "id": "FAQ-023",
+    "question": "What happens to my content after the campaign ends?",
+    "answer": "Brands may have the right to use your content for their marketing purposes as per the campaign agreement. Typically, usage rights are limited to 6-12 months post-campaign. You retain ownership of your content. Review the specific terms in each campaign agreement.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-024",
+    "question": "Can I negotiate campaign rates?",
+    "answer": "Campaign budgets are pre-defined based on scope, deliverables, and brand investment. However, you can discuss rates with your Creator Success manager, especially if you bring unique value or have exceptional performance metrics. Rate negotiations must be completed before campaign acceptance.",
+    "category": "payments"
+  },
+  {
+    "id": "FAQ-025",
+    "question": "How do I get verified on social media platforms?",
+    "answer": "Platform verification is managed by the respective social media platforms (Instagram, YouTube, Twitter, etc.). We can provide supporting documentation if needed, but the verification process and criteria are determined by each platform independently.",
+    "category": "profile"
+  },
+  {
+    "id": "FAQ-026",
+    "question": "What are the different creator tiers?",
+    "answer": "We have four creator tiers: 1. Rising (0-10K followers, new creators), 2. Growth (10K-100K followers), 3. Pro (100K-500K followers), 4. Elite (500K+ followers). Tier determines campaign eligibility, budget range, and priority support. You can move up tiers as you grow.",
+    "category": "onboarding"
+  },
+  {
+    "id": "FAQ-027",
+    "question": "How do I refer other creators?",
+    "answer": "You can refer creators through the 'Refer a Creator' program in your dashboard. Share your unique referral link with fellow creators. You earn 5% of their first campaign earnings as a referral bonus. There's no limit on referrals.",
+    "category": "general"
+  },
+  {
+    "id": "FAQ-028",
+    "question": "What should I do if a brand asks for additional work outside the brief?",
+    "answer": "Any additional work outside the agreed campaign brief should be discussed with your Creator Success manager. Do not agree to extra deliverables without a formal scope change and budget adjustment. We'll handle the negotiation with the brand on your behalf.",
+    "category": "campaigns"
+  },
+  {
+    "id": "FAQ-029",
+    "question": "How do I communicate with my Creator Success manager?",
+    "answer": "You can message your Creator Success manager through the in-app chat in your dashboard, via email, or schedule a call through the booking link in your portal. We aim to respond to all queries within 24 hours on business days.",
+    "category": "general"
+  },
+  {
+    "id": "FAQ-030",
+    "question": "What happens if a brand cancels a campaign?",
+    "answer": "If a brand cancels before content creation, no payment is due. If cancellation happens after content delivery, you may be entitled to a partial or full payment depending on the contract terms. Your Creator Success manager will handle the compensation discussion.",
+    "category": "payments"
+  }
+]

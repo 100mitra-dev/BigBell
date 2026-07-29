@@ -1,0 +1,152 @@
+[
+  {
+    "id": "PAY-001",
+    "creator_id": "CRE-001",
+    "campaign_id": "CAM-021",
+    "amount": 75000,
+    "status": "paid",
+    "due_date": "2026-06-15",
+    "processed_at": "2026-06-20",
+    "notes": "Payment for StyleFusion Fashion Show coverage."
+  },
+  {
+    "id": "PAY-002",
+    "creator_id": "CRE-003",
+    "campaign_id": "CAM-022",
+    "amount": 120000,
+    "status": "paid",
+    "due_date": "2026-06-01",
+    "processed_at": "2026-06-12",
+    "notes": "FitIndia campaign payment - full amount."
+  },
+  {
+    "id": "PAY-003",
+    "creator_id": "CRE-004",
+    "campaign_id": "CAM-022",
+    "amount": 200000,
+    "status": "processed",
+    "due_date": "2026-06-01",
+    "processed_at": "2026-06-25",
+    "notes": "TechSummit coverage - payment initiated."
+  },
+  {
+    "id": "PAY-004",
+    "creator_id": "CRE-008",
+    "campaign_id": "CAM-011",
+    "amount": 180000,
+    "status": "processed",
+    "due_date": "2026-07-15",
+    "processed_at": "2026-07-28",
+    "notes": "FinWise campaign - under processing."
+  },
+  {
+    "id": "PAY-005",
+    "creator_id": "CRE-010",
+    "campaign_id": "CAM-012",
+    "amount": 160000,
+    "status": "pending",
+    "due_date": "2026-08-25",
+    "processed_at": null,
+    "notes": "MusicWave festival - deliverables pending review."
+  },
+  {
+    "id": "PAY-006",
+    "creator_id": "CRE-022",
+    "campaign_id": "CAM-001",
+    "amount": 75000,
+    "status": "pending",
+    "due_date": "2026-08-15",
+    "processed_at": null,
+    "notes": "Summer Glow campaign - waiting for content approval."
+  },
+  {
+    "id": "PAY-007",
+    "creator_id": "CRE-005",
+    "campaign_id": "CAM-005",
+    "amount": 65000,
+    "status": "pending",
+    "due_date": "2026-09-05",
+    "processed_at": null,
+    "notes": "FreshBites campaign - awaiting deliverables."
+  },
+  {
+    "id": "PAY-008",
+    "creator_id": "CRE-009",
+    "campaign_id": "CAM-007",
+    "amount": 110000,
+    "status": "processed",
+    "due_date": "2026-08-05",
+    "processed_at": "2026-08-01",
+    "notes": "StyleCraft campaign - payment initiated early."
+  },
+  {
+    "id": "PAY-009",
+    "creator_id": "CRE-016",
+    "campaign_id": "CAM-002",
+    "amount": 120000,
+    "status": "pending",
+    "due_date": "2026-09-15",
+    "processed_at": null,
+    "notes": "FitIndia - campaign in progress."
+  },
+  {
+    "id": "PAY-010",
+    "creator_id": "CRE-020",
+    "campaign_id": "CAM-003",
+    "amount": 150000,
+    "status": "pending",
+    "due_date": "2026-09-01",
+    "processed_at": null,
+    "notes": "GadgetX review - campaign active."
+  },
+  {
+    "id": "PAY-011",
+    "creator_id": "CRE-028",
+    "campaign_id": "CAM-014",
+    "amount": 130000,
+    "status": "pending",
+    "due_date": "2026-10-05",
+    "processed_at": null,
+    "notes": "HealthFirst Insurance - campaign just started."
+  },
+  {
+    "id": "PAY-012",
+    "creator_id": "CRE-030",
+    "campaign_id": "CAM-018",
+    "amount": 60000,
+    "status": "pending",
+    "due_date": "2026-10-20",
+    "processed_at": null,
+    "notes": "ZenSpace - campaign active."
+  },
+  {
+    "id": "PAY-013",
+    "creator_id": "CRE-042",
+    "campaign_id": "CAM-012",
+    "amount": 160000,
+    "status": "pending",
+    "due_date": "2026-08-25",
+    "processed_at": null,
+    "notes": "MusicWave - awaiting deliverables."
+  },
+  {
+    "id": "PAY-014",
+    "creator_id": "CRE-006",
+    "campaign_id": "CAM-004",
+    "amount": 90000,
+    "status": "pending",
+    "due_date": "2026-09-30",
+    "processed_at": null,
+    "notes": "TravelEase - campaign in progress."
+  },
+  {
+    "id": "PAY-015",
+    "creator_id": "CRE-002",
+    "campaign_id": "CAM-008",
+    "amount": 200000,
+    "status": "disputed",
+    "due_date": "2026-08-25",
+    "processed_at": null,
+    "notes": "Dispute raised by creator. Missing deliverables claimed by brand."
+  }
+]

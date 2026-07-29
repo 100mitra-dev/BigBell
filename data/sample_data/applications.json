@@ -1,0 +1,200 @@
+[
+  {
+    "id": "APP-001",
+    "creator_id": "CRE-040",
+    "campaign_id": "CAM-009",
+    "status": "reviewed",
+    "applied_at": "2026-07-20",
+    "reviewed_at": "2026-07-29",
+    "score": 5.1,
+    "ai_notes": "Niche (Fitness & Wellness) may not be ideal for this campaign | Good content quality | Language (Hindi) matches campaign requirements",
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-002",
+    "creator_id": "CRE-041",
+    "campaign_id": "CAM-001",
+    "status": "shortlisted",
+    "applied_at": "2026-07-22",
+    "reviewed_at": "2026-07-29",
+    "score": 7.5,
+    "ai_notes": "Strong niche alignment with Summer Glow Makeup Campaign | Good content quality | Language (Hindi) matches campaign requirements",
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-003",
+    "creator_id": "CRE-021",
+    "campaign_id": "CAM-013",
+    "status": "reviewed",
+    "applied_at": "2026-07-21",
+    "reviewed_at": "2026-07-29",
+    "score": 6.1,
+    "ai_notes": "Niche (Gardening & Nature) may not be ideal for this campaign | Good content quality | Language mismatch - creator primarily uses Marathi",
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-004",
+    "creator_id": "CRE-007",
+    "campaign_id": "CAM-006",
+    "status": "shortlisted",
+    "applied_at": "2026-07-23",
+    "reviewed_at": "2026-07-29",
+    "score": 7.9,
+    "ai_notes": "Strong niche alignment with EduSmart Learning App Launch | Good content quality | Language (Telugu) matches campaign requirements",
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-005",
+    "creator_id": "CRE-026",
+    "campaign_id": "CAM-006",
+    "status": "pending",
+    "applied_at": "2026-07-24",
+    "reviewed_at": null,
+    "score": null,
+    "ai_notes": null,
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-006",
+    "creator_id": "CRE-049",
+    "campaign_id": "CAM-001",
+    "status": "pending",
+    "applied_at": "2026-07-25",
+    "reviewed_at": null,
+    "score": null,
+    "ai_notes": null,
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-007",
+    "creator_id": "CRE-049",
+    "campaign_id": "CAM-009",
+    "status": "pending",
+    "applied_at": "2026-07-25",
+    "reviewed_at": null,
+    "score": null,
+    "ai_notes": null,
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-008",
+    "creator_id": "CRE-015",
+    "campaign_id": "CAM-013",
+    "status": "reviewed",
+    "applied_at": "2026-07-18",
+    "reviewed_at": "2026-07-20",
+    "score": 7.2,
+    "ai_notes": "Profile completeness needs improvement (75%). Home decor niche partially matches DIY furniture line. Engagement rate below average.",
+    "reviewer_notes": "Potential but needs profile work before approval."
+  },
+  {
+    "id": "APP-009",
+    "creator_id": "CRE-023",
+    "campaign_id": "CAM-012",
+    "status": "rejected",
+    "applied_at": "2026-07-15",
+    "reviewed_at": "2026-07-18",
+    "score": 4.5,
+    "ai_notes": "Creator is inactive (no posts in 2 months). Music reviews niche doesn't align well with festival promotion. Low engagement rate.",
+    "reviewer_notes": "Inactive creator. Not suitable for time-sensitive campaign."
+  },
+  {
+    "id": "APP-010",
+    "creator_id": "CRE-040",
+    "campaign_id": "CAM-002",
+    "status": "shortlisted",
+    "applied_at": "2026-07-19",
+    "reviewed_at": "2026-07-22",
+    "score": 8.0,
+    "ai_notes": "Fitness niche perfectly aligns. Military background adds credibility. Profile completeness is 68%, needs improvement. No campaign history.",
+    "reviewer_notes": "Good potential for fitness campaign. Ask him to complete profile."
+  },
+  {
+    "id": "APP-011",
+    "creator_id": "CRE-012",
+    "campaign_id": "CAM-010",
+    "status": "accepted",
+    "applied_at": "2026-07-17",
+    "reviewed_at": "2026-07-19",
+    "score": 8.8,
+    "ai_notes": "Automotive + Travel niches perfectly match car rental campaign. Decent following across platforms. Good engagement rate.",
+    "reviewer_notes": "Great match! Confirmed availability."
+  },
+  {
+    "id": "APP-012",
+    "creator_id": "CRE-024",
+    "campaign_id": "CAM-018",
+    "status": "accepted",
+    "applied_at": "2026-07-20",
+    "reviewed_at": "2026-07-22",
+    "score": 9.0,
+    "ai_notes": "Wellness niche aligns perfectly with meditation app. High engagement rate (4.6%). Complete profile. Strong recommendation.",
+    "reviewer_notes": "Perfect fit for ZenSpace campaign."
+  },
+  {
+    "id": "APP-013",
+    "creator_id": "CRE-030",
+    "campaign_id": "CAM-018",
+    "status": "accepted",
+    "applied_at": "2026-07-20",
+    "reviewed_at": "2026-07-22",
+    "score": 9.5,
+    "ai_notes": "Yoga & Spirituality niche is ideal for meditation app. High content quality (9.0). Excellent profile completeness (95%). Top match.",
+    "reviewer_notes": "Ideal creator for this campaign."
+  },
+  {
+    "id": "APP-014",
+    "creator_id": "CRE-043",
+    "campaign_id": "CAM-015",
+    "status": "shortlisted",
+    "applied_at": "2026-07-23",
+    "reviewed_at": "2026-07-24",
+    "score": 7.5,
+    "ai_notes": "Lifestyle niche fits eco-friendly theme. Moderate following. Engagement rate is average. Good content quality.",
+    "reviewer_notes": "Good for eco campaign. Check availability."
+  },
+  {
+    "id": "APP-015",
+    "creator_id": "CRE-022",
+    "campaign_id": "CAM-009",
+    "status": "accepted",
+    "applied_at": "2026-07-19",
+    "reviewed_at": "2026-07-21",
+    "score": 9.2,
+    "ai_notes": "Top beauty creator with skincare sub-niche. Excellent profile and engagement. Multilingual. Premium match for ayurvedic skincare.",
+    "reviewer_notes": "Strong match. Confirmed."
+  },
+  {
+    "id": "APP-016",
+    "creator_id": "CRE-027",
+    "campaign_id": "CAM-020",
+    "status": "pending",
+    "applied_at": "2026-07-24",
+    "reviewed_at": null,
+    "score": null,
+    "ai_notes": null,
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-017",
+    "creator_id": "CRE-018",
+    "campaign_id": "CAM-020",
+    "status": "pending",
+    "applied_at": "2026-07-24",
+    "reviewed_at": null,
+    "score": null,
+    "ai_notes": null,
+    "reviewer_notes": null
+  },
+  {
+    "id": "APP-018",
+    "creator_id": "CRE-005",
+    "campaign_id": "CAM-005",
+    "status": "accepted",
+    "applied_at": "2026-07-12",
+    "reviewed_at": "2026-07-14",
+    "score": 9.1,
+    "ai_notes": "Food niche perfectly matches. High quality content (8.8). Strong engagement. Excellent profile. Top pick.",
+    "reviewer_notes": "Approved. Great match for FreshBites."
+  }
+]
