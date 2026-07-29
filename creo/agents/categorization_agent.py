@@ -2,7 +2,7 @@ import random
 
 from creo.agents.base import BaseAgent
 from creo.models import Creator
-from creo.config import NICHES, LANGUAGES
+from creo.config import get_all_niches, LANGUAGES
 
 
 class CategorizationAgent(BaseAgent):
@@ -13,7 +13,7 @@ class CategorizationAgent(BaseAgent):
 
     def _mock_categorize(self, creator: Creator) -> dict:
         primary_niche = creator.primary_niche
-        niche_scores = {niche: random.uniform(0, 5) for niche in NICHES}
+        niche_scores = {niche: random.uniform(0, 5) for niche in get_all_niches()}
         niche_scores[primary_niche] = random.uniform(8, 10)
 
         for secondary in creator.secondary_niches:
@@ -60,7 +60,7 @@ Followers: {creator.total_followers:,}
 Content Quality: {creator.content_quality_score}/10
 Engagement Rate: {creator.avg_engagement_rate}%
 
-Available niches: {', '.join(NICHES)}
+Available niches: {', '.join(get_all_niches())}
 Available languages: {', '.join(LANGUAGES)}
 
 Return a JSON with:

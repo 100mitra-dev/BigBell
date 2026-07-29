@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from creo.models import Creator, Campaign, Payment, FollowUpNote
+from creo.models import Creator, Campaign, Payment, CampaignAssignment, FollowUpNote
 from creo.runtime_config import get_data_source
 
 
@@ -106,3 +106,31 @@ class FollowUpNoteRepository(ABC):
 def get_follow_up_note_repo() -> FollowUpNoteRepository:
     from creo.storage.json.note_repo import JsonFollowUpNoteRepository
     return JsonFollowUpNoteRepository()
+
+
+class AssignmentRepository(ABC):
+    @abstractmethod
+    def list_all(self) -> list[CampaignAssignment]: ...
+
+    @abstractmethod
+    def get_by_id(self, assignment_id: str) -> Optional[CampaignAssignment]: ...
+
+    @abstractmethod
+    def get_for_campaign(self, campaign_id: str) -> list[CampaignAssignment]: ...
+
+    @abstractmethod
+    def get_for_creator(self, creator_id: str) -> list[CampaignAssignment]: ...
+
+    @abstractmethod
+    def add(self, assignment: CampaignAssignment): ...
+
+    @abstractmethod
+    def delete(self, assignment_id: str): ...
+
+    @abstractmethod
+    def save_all(self, assignments: list[CampaignAssignment]): ...
+
+
+def get_assignment_repo() -> AssignmentRepository:
+    from creo.storage.json.assignment_repo import JsonAssignmentRepository
+    return JsonAssignmentRepository()

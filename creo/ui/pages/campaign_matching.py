@@ -4,31 +4,40 @@ import uuid
 
 from creo.services.creator_service import CreatorService
 from creo.services.campaign_service import CampaignService
+from creo.services.assignment_service import AssignmentService, STATUS_LABELS, STATUS_COLORS, NEXT_STATUS, AssignmentStatus
 from creo.agents.matching_agent import MatchingAgent
 from creo.models import Campaign
-from creo.config import NICHES, LANGUAGES
+from creo.config import get_all_niches, LANGUAGES
 from creo.storage.csv_handler import export_campaigns_to_csv, import_campaigns_from_csv
 
 if "cs" not in st.session_state:
     st.session_state.cs = CreatorService()
 if "cams" not in st.session_state:
     st.session_state.cams = CampaignService()
+if "asvc" not in st.session_state:
+    st.session_state.asvc = AssignmentService()
 cs = st.session_state.cs
 cams = st.session_state.cams
+asvc = st.session_state.asvc
+
+for c in cams.campaigns:
+    for cid in c.assigned_creators:
+        if not asvc.is_assigned(c.id, cid):
+            asvc.assign(c.id, cid)
 
 matcher = MatchingAgent()
 
 st.title("Match Creators")
-st.caption("AI-powered creator–campaign matchmaking with assignment")
+st.caption("AI-powered creator–campaign matchmaking with assignment workflow")
 
-m1, m2, m3 = st.columns(3)
+m1, m2, m3, m4 = st.columns(4)
 m1.metric("Active campaigns", cams.get_active_count())
 m2.metric("Total creators", len(cs.creators))
 m3.metric("Total budget", f"₹{cams.get_total_budget():,.0f}")
+m4.metric("Assignments", len(asvc.assignments))
 
 left, right = st.columns([1, 2])
 
-# ── LEFT: Controls ──
 with left:
     with st.container(border=True):
         st.markdown("**Campaign**")
@@ -46,7 +55,6 @@ with left:
 
         run = st.button("Run AI matching", type="primary", icon=":material/target:", use_container_width=True)
 
-# ── RIGHT: Results ──
 pool = cs.creators
 if niche_f != "All":
     pool = [c for c in pool if c.primary_niche == niche_f or niche_f in c.secondary_niches]
@@ -69,17 +77,40 @@ with right:
                     all_matches.append({"campaign": campaign, "creator": creator, "match": matcher.match(creator, campaign)})
 
         all_matches.sort(key=lambda x: x["match"]["overall_score"], reverse=True)
-        st.markdown(f"### Top matches")
-        st.caption(f"{len(all_matches)} evaluated")
+        top_matches = all_matches[:30]
 
-        for m in all_matches[:15]:
+        st.markdown(f"### Top matches")
+        st.caption(f"{len(all_matches)} evaluated, showing top {len(top_matches)}")
+
+        bulk_col1, bulk_col2 = st.columns([3, 1])
+        with bulk_col1:
+            assign_all = st.button("Assign all visible", type="primary", icon=":material/select_all:", use_container_width=True)
+        with bulk_col2:
+            st.markdown('<div style="height:0.25rem"></div>', unsafe_allow_html=True)
+            show_board = st.toggle("Status board", key="show_status_board", value=False)
+
+        if assign_all:
+            for m in top_matches:
+                campaign = m["campaign"]
+                creator = m["creator"]
+                score = m["match"]["overall_score"]
+                if not asvc.is_assigned(campaign.id, creator.id):
+                    asvc.assign(campaign.id, creator.id, score=score)
+                    if creator.id not in campaign.assigned_creators:
+                        campaign.assigned_creators.append(creator.id)
+                        cams.repo.save_all(cams.campaigns)
+            st.success(f"Assigned {len(top_matches)} creators")
+            st.rerun()
+
+        for idx, m in enumerate(top_matches):
             campaign = m["campaign"]
             creator = m["creator"]
             match = m["match"]
             score = match["overall_score"]
+            assignment = asvc.get_for_campaign_creator(campaign.id, creator.id)
 
             with st.container(border=True):
-                row = st.columns([2, 1, 1])
+                row = st.columns([2, 1, 1.2])
                 with row[0]:
                     st.markdown(f"**{creator.name}**")
                     st.caption(f"{creator.primary_niche} · {creator.primary_language}")
@@ -90,40 +121,80 @@ with right:
                     st.markdown(f"<span style='font-size:1.5rem;font-weight:700;color:{color}'>{score}/10</span>", unsafe_allow_html=True)
                     st.markdown(f"*{match.get('match_quality', '').title()}*")
                 with row[2]:
-                    already = creator.id in campaign.assigned_creators
-                    if already:
-                        if st.button("Unassign", key=f"ass_{creator.id}_{campaign.id}", icon=":material/person_remove:", use_container_width=True):
-                            campaign.assigned_creators.remove(creator.id)
-                            cams.repo.save_all(cams.campaigns)
+                    if assignment:
+                        sc = assignment.status
+                        badge_color = STATUS_COLORS.get(sc.value, "#95A5A6")
+                        label = STATUS_LABELS.get(sc, sc.value)
+                        st.markdown(f'<span style="background:{badge_color}22;color:{badge_color};padding:2px 10px;border-radius:10px;font-size:0.8rem;font-weight:600">{label}</span>', unsafe_allow_html=True)
+
+                        nxt_status = NEXT_STATUS.get(sc)
+                        if nxt_status:
+                            if st.button(f"Advance to {STATUS_LABELS.get(nxt_status, nxt_status.value)}", key=f"adv_{assignment.id}", icon=":material/arrow_forward:", use_container_width=True):
+                                nxt = asvc.advance_status(assignment.id)
+                                if nxt:
+                                    st.success(f"Advanced to **{STATUS_LABELS.get(nxt, nxt.value)}**")
+                                st.rerun()
+                        if st.button("Unassign", key=f"unas_{assignment.id}", icon=":material/person_remove:", use_container_width=True):
+                            asvc.unassign(campaign.id, creator.id)
+                            if creator.id in campaign.assigned_creators:
+                                campaign.assigned_creators.remove(creator.id)
+                                cams.repo.save_all(cams.campaigns)
                             st.success(f"Unassigned {creator.name}")
                             st.rerun()
                     else:
                         if st.button("Assign", key=f"ass_{creator.id}_{campaign.id}", icon=":material/person_add:", type="primary", use_container_width=True):
-                            campaign.assigned_creators.append(creator.id)
-                            cams.repo.save_all(cams.campaigns)
+                            asvc.assign(campaign.id, creator.id, score=score)
+                            if creator.id not in campaign.assigned_creators:
+                                campaign.assigned_creators.append(creator.id)
+                                cams.repo.save_all(cams.campaigns)
                             st.success(f"Assigned {creator.name}")
                             st.rerun()
 
-                with st.expander("Match breakdown", icon=":material/insights:"):
-                    for pt in match.get("alignment_points", []):
-                        st.markdown(f":material/check: {pt}")
-                    st.markdown("**Scores**")
-                    sc1, sc2, sc3, sc4 = st.columns(4)
-                    sc1.metric("Niche", f'{match.get("niche_overlap", 0)}/10')
-                    sc2.metric("Language", f'{match.get("language_overlap", 0)}/10')
-                    sc3.metric("Engagement", f'{match.get("engagement_score", 0)}/10')
-                    sc4.metric("Quality", f'{match.get("quality_score", 0)}/10')
-                    sc1.metric("Reach", f'{match.get("reach_score", 0)}/10')
-                    sc2.metric("Budget fit", f'{match.get("budget_fit", 0)}/10')
-                    if creator.total_campaigns_completed > 0:
-                        sc3.metric("Avg earnings/ campaign", f"₹{creator.total_earnings / creator.total_campaigns_completed:,.0f}")
+                if not assignment:
+                    with st.expander("Match breakdown", icon=":material/insights:"):
+                        for pt in match.get("alignment_points", []):
+                            st.markdown(f":material/check: {pt}")
+                        st.markdown("**Scores**")
+                        sc1, sc2, sc3, sc4 = st.columns(4)
+                        sc1.metric("Niche", f'{match.get("niche_overlap", 0)}/10')
+                        sc2.metric("Language", f'{match.get("language_overlap", 0)}/10')
+                        sc3.metric("Engagement", f'{match.get("engagement_score", 0)}/10')
+                        sc4.metric("Quality", f'{match.get("quality_score", 0)}/10')
+                        sc1.metric("Reach", f'{match.get("reach_score", 0)}/10')
+                        sc2.metric("Budget fit", f'{match.get("budget_fit", 0)}/10')
+                        if creator.total_campaigns_completed > 0:
+                            sc3.metric("Avg earnings/ campaign", f"₹{creator.total_earnings / creator.total_campaigns_completed:,.0f}")
 
                 st.caption(f":material/campaign: {campaign.title} ({campaign.brand}) — ₹{campaign.budget:,.0f}")
+
+        if show_board:
+            st.divider()
+            st.markdown("### Assignment status board")
+            board_targets = targets if cid != "all" else cams.get_active_campaigns()
+            for campaign in board_targets:
+                if not campaign:
+                    continue
+                assignments = asvc.get_for_campaign(campaign.id)
+                if not assignments:
+                    continue
+                with st.container(border=True):
+                    st.markdown(f"**{campaign.title}** ({campaign.brand}) — {len(assignments)} assignments")
+                    status_data = []
+                    for a in assignments:
+                        creator = cs.get_by_id(a.creator_id)
+                        if not creator:
+                            continue
+                        sc = a.status
+                        badge_color = STATUS_COLORS.get(sc.value, "#95A5A6")
+                        label = STATUS_LABELS.get(sc, sc.value)
+                        badge = f'<span style="background:{badge_color}22;color:{badge_color};padding:2px 10px;border-radius:10px;font-size:0.8rem;font-weight:600">{label}</span>'
+                        status_data.append({"Creator": creator.name, "Status": badge, "Score": f"{a.score}/10", "Assigned": a.assigned_at})
+                    df_status = pd.DataFrame(status_data)
+                    st.write(df_status.to_html(escape=False, index=False), unsafe_allow_html=True)
 
     else:
         st.info("Select a campaign and filters on the left, then click **Run AI matching**.")
 
-# ── CAMPAIGN MANAGEMENT ──
 st.divider()
 st.subheader("Campaign management")
 
@@ -160,7 +231,7 @@ if st.session_state.get("show_add_campaign_toggle"):
                 budget = st.number_input("Budget (₹)", min_value=0.0, value=10000.0, step=5000.0)
             with col_b:
                 deadline = st.date_input("Deadline")
-                target_niches = st.multiselect("Target niches", NICHES)
+                target_niches = st.multiselect("Target niches", get_all_niches())
                 target_languages = st.multiselect("Target languages", LANGUAGES)
             description = st.text_area("Description")
             if st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True) and title and brand:
@@ -176,6 +247,8 @@ all_campaigns = cams.campaigns
 if all_campaigns:
     camp_data = []
     for c in all_campaigns:
+        summary = asvc.get_campaign_summary(c.id)
+        status_parts = [f"{k}: {v}" for k, v in summary.items()]
         camp_data.append({
             "ID": c.id, "Title": c.title, "Brand": c.brand,
             "Budget": f"₹{c.budget:,.0f}", "Deadline": c.deadline,
@@ -187,11 +260,16 @@ if all_campaigns:
     for c in all_campaigns:
         cc1, cc2, cc3 = st.columns([4, 1, 1])
         with cc1:
-            st.caption(f"**{c.title}** ({c.brand}) — {c.status} — {len(c.assigned_creators)} assigned")
+            summary = asvc.get_campaign_summary(c.id)
+            parts = "; ".join(f"{k}: {v}" for k, v in summary.items()) if summary else "0 assigned"
+            st.caption(f"**{c.title}** ({c.brand}) — {c.status} — {parts}")
         with cc2:
             edit_on = st.toggle("Edit", key=f"ec_{c.id}")
         with cc3:
             if st.button("Delete", key=f"dc_{c.id}", icon=":material/delete:", use_container_width=True):
+                for a in asvc.get_for_campaign(c.id):
+                    asvc.repo.delete(a.id)
+                asvc.refresh()
                 cams.delete(c.id)
                 st.rerun()
 
@@ -205,7 +283,7 @@ if all_campaigns:
                         e_budget = st.number_input("Budget (₹)", min_value=0.0, value=c.budget, step=5000.0)
                     with e2:
                         e_deadline = st.date_input("Deadline", value=pd.to_datetime(c.deadline).date() if c.deadline else None)
-                        e_niches = st.multiselect("Target niches", NICHES, default=c.target_niches)
+                        e_niches = st.multiselect("Target niches", get_all_niches(), default=[n for n in c.target_niches if n in get_all_niches()])
                         e_langs = st.multiselect("Target languages", LANGUAGES, default=c.target_languages)
                     e_desc = st.text_area("Description", value=c.description)
                     if st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True):

@@ -5,6 +5,7 @@ import uuid
 from creo.services.creator_service import CreatorService
 from creo.services.campaign_service import CampaignService
 from creo.services.follow_up_service import FollowUpNoteService
+from creo.services.assignment_service import AssignmentService, STATUS_LABELS, STATUS_COLORS, AssignmentStatus
 from creo.models import FollowUpNote
 from creo.utils.helpers import days_until, today_str
 
@@ -14,9 +15,12 @@ if "cams" not in st.session_state:
     st.session_state.cams = CampaignService()
 if "fns" not in st.session_state:
     st.session_state.fns = FollowUpNoteService()
+if "asvc" not in st.session_state:
+    st.session_state.asvc = AssignmentService()
 cs = st.session_state.cs
 cams = st.session_state.cams
 fns = st.session_state.fns
+asvc = st.session_state.asvc
 
 st.title("Follow-ups")
 st.caption("Deadline tracking, deliverable management, and campaign notes")
@@ -29,7 +33,7 @@ col1, col2, col3, col4 = st.columns(4)
 col1.metric("Active campaigns", len(active))
 col2.metric("Overdue", overdue, delta_color="inverse")
 col3.metric("Due soon (7 days)", due_soon)
-col4.metric("Total assigned", sum(len(c.assigned_creators) for c in active))
+col4.metric("Total assignments", len(asvc.assignments))
 
 tab1, tab2, tab3 = st.tabs(["Campaign deadlines", "Pending deliverables", "Campaign notes"])
 
@@ -57,23 +61,33 @@ with tab1:
                         st.info("No creators assigned to this campaign.")
 
 with tab2:
+    wk_filter = st.selectbox("Workflow status", ["All", "matched", "invited", "accepted", "brief_sent", "content_received", "approved", "rejected"], label_visibility="collapsed")
+
     deliverables = []
     for campaign in active:
-        for cid in campaign.assigned_creators:
-            creator = cs.get_by_id(cid)
-            if creator:
-                d = days_until(campaign.deadline)
-                deliverables.append({
-                    "Creator": creator.name,
-                    "Campaign": campaign.title,
-                    "Deadline": campaign.deadline,
-                    "Days left": d,
-                    "Status": "Overdue" if d < 0 else "Pending" if d <= 7 else "On track",
-                })
+        for assignment in asvc.get_for_campaign(campaign.id):
+            creator = cs.get_by_id(assignment.creator_id)
+            if not creator:
+                continue
+            if wk_filter != "All" and assignment.status.value != wk_filter:
+                continue
+            d = days_until(campaign.deadline)
+            deadline_status = "Overdue" if d < 0 else "Pending" if d <= 7 else "On track"
+            wk_label = STATUS_LABELS.get(assignment.status, assignment.status.value)
+            deliverables.append({
+                "Creator": creator.name,
+                "Campaign": campaign.title,
+                "Deadline": campaign.deadline,
+                "Days left": d,
+                "Deadline status": deadline_status,
+                "Workflow": wk_label,
+            })
 
     if deliverables:
         df = pd.DataFrame(deliverables)
-        st.dataframe(df, hide_index=True)
+        st.dataframe(df, hide_index=True, column_config={
+            "Days left": st.column_config.NumberColumn(width="small"),
+        })
 
         c1, c2 = st.columns(2)
         with c1:
@@ -89,7 +103,7 @@ with tab2:
                 msg = f"Hi team! Reminder about the upcoming deadline for **{sample.title}** ({sample.brand}). Please submit deliverables by {sample.deadline}. Reach out if you need support!"
                 st.code(msg, language="text")
     else:
-        st.info("No pending deliverables.", icon=":material/inbox:")
+        st.info("No deliverables matching this filter.", icon=":material/inbox:")
 
 with tab3:
     st.markdown("**Add a note for any campaign**")

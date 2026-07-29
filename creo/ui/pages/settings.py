@@ -74,6 +74,34 @@ with st.container(border=True):
         st.warning("API mode requires valid API keys configured above. Falls back to mock data if keys are missing or invalid.")
 
 with st.container(border=True):
+    st.subheader("Custom niches")
+    st.caption("Add or remove custom niches beyond the default list")
+
+    from creo.config import load_custom_niches, add_custom_niche, remove_custom_niche, NICHES
+
+    custom = load_custom_niches()
+    if custom:
+        for n in custom:
+            c1, c2 = st.columns([4, 1])
+            with c1:
+                st.markdown(f"- {n}")
+            with c2:
+                if st.button("Remove", key=f"rm_n_{n}", icon=":material/delete:", use_container_width=True):
+                    remove_custom_niche(n)
+                    st.rerun()
+    else:
+        st.caption("No custom niches yet")
+
+    new_niche = st.text_input("New niche name", placeholder="e.g. Crypto & Web3", key="new_niche_input")
+    if st.button("Add custom niche", icon=":material/add:", use_container_width=True) and new_niche:
+        if new_niche not in NICHES and new_niche not in custom:
+            add_custom_niche(new_niche)
+            st.success(f"Added: {new_niche}")
+            st.rerun()
+        else:
+            st.warning("Niche already exists")
+
+with st.container(border=True):
     st.subheader("About Creo")
     st.markdown("""
     **Creo** is an AI-powered platform for creator onboarding, management, and campaign operations.

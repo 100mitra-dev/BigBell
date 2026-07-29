@@ -111,6 +111,28 @@ class Payment(BaseModel):
     notes: Optional[str] = None
 
 
+class AssignmentStatus(str, Enum):
+    MATCHED = "matched"
+    INVITED = "invited"
+    ACCEPTED = "accepted"
+    BRIEF_SENT = "brief_sent"
+    CONTENT_RECEIVED = "content_received"
+    APPROVED = "approved"
+    PAID = "paid"
+    REJECTED = "rejected"
+
+
+class CampaignAssignment(BaseModel):
+    id: str
+    campaign_id: str
+    creator_id: str
+    status: AssignmentStatus = AssignmentStatus.MATCHED
+    score: float = 0.0
+    assigned_at: str = ""
+    updated_at: str = ""
+    notes: Optional[str] = None
+
+
 class FollowUpNote(BaseModel):
     id: str
     campaign_id: str

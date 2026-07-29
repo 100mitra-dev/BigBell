@@ -8,7 +8,7 @@ from creo.models import CreatorStatus
 from creo.agents.application_reviewer import ApplicationReviewerAgent
 from creo.agents.verification_agent import VerificationAgent
 from creo.agents.categorization_agent import CategorizationAgent
-from creo.config import NICHES, LANGUAGES
+from creo.config import get_all_niches, LANGUAGES
 from creo.utils.helpers import load_applications, save_applications, today_str
 
 if "cs" not in st.session_state:
@@ -348,7 +348,7 @@ with right:
             st.markdown("**Manual overrides**")
             ov1, ov2 = st.columns(2)
             with ov1:
-                over_niche = st.selectbox("Primary niche", NICHES, index=NICHES.index(cres["primary_niche"]) if cres["primary_niche"] in NICHES else 0, key=f"on_{creator.id}")
+                over_niche = st.selectbox("Primary niche", get_all_niches(), index=get_all_niches().index(cres["primary_niche"]) if cres["primary_niche"] in get_all_niches() else 0, key=f"on_{creator.id}")
                 over_lang = st.selectbox("Primary language", LANGUAGES, index=LANGUAGES.index(cres["primary_language"]) if cres["primary_language"] in LANGUAGES else 0, key=f"ol_{creator.id}")
             with ov2:
                 over_tags = st.text_input("Tags (comma-separated)", value=", ".join(cres["suggested_tags"]), key=f"ot_{creator.id}")
@@ -366,7 +366,7 @@ with right:
             st.info("Already classified. Re-run AI or edit overrides below.")
             ov1, ov2 = st.columns(2)
             with ov1:
-                over_niche = st.selectbox("Primary niche", NICHES, index=NICHES.index(creator.primary_niche) if creator.primary_niche in NICHES else 0, key=f"on_{creator.id}")
+                over_niche = st.selectbox("Primary niche", get_all_niches(), index=get_all_niches().index(creator.primary_niche) if creator.primary_niche in get_all_niches() else 0, key=f"on_{creator.id}")
                 over_lang = st.selectbox("Primary language", LANGUAGES, index=LANGUAGES.index(creator.primary_language) if creator.primary_language in LANGUAGES else 0, key=f"ol_{creator.id}")
             with ov2:
                 over_tags = st.text_input("Tags (comma-separated)", value=", ".join(creator.suggested_tags) if creator.suggested_tags else "", key=f"ot_{creator.id}")

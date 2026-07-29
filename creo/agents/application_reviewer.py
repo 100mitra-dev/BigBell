@@ -3,7 +3,6 @@ from datetime import date
 
 from creo.agents.base import BaseAgent
 from creo.models import Creator, Campaign
-from creo.config import NICHES
 
 
 class ApplicationReviewerAgent(BaseAgent):

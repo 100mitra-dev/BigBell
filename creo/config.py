@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -5,6 +6,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 SAMPLE_DATA_DIR = DATA_DIR / "sample_data"
 VECTOR_STORE_DIR = DATA_DIR / "vector_store"
+CUSTOM_NICHES_FILE = SAMPLE_DATA_DIR / "custom_niches.json"
+CUSTOM_LANGUAGES_FILE = SAMPLE_DATA_DIR / "custom_languages.json"
 
 AI_PROVIDER = os.getenv("AI_PROVIDER", "mock")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -49,3 +52,54 @@ LANGUAGES = [
     "Bhojpuri", "Haryanvi", "Rajasthani", "Sanskrit", "Arabic",
     "French",
 ]
+
+
+def _load_list(path: Path) -> list[str]:
+    if path.exists():
+        with open(path) as f:
+            return json.load(f)
+    return []
+
+
+def _save_list(path: Path, items: list[str]):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(items, f, indent=2)
+
+
+def load_custom_niches() -> list[str]:
+    return _load_list(CUSTOM_NICHES_FILE)
+
+
+def save_custom_niches(niches: list[str]):
+    _save_list(CUSTOM_NICHES_FILE, niches)
+
+
+def add_custom_niche(niche: str):
+    niches = load_custom_niches()
+    if niche and niche not in NICHES and niche not in niches:
+        niches.append(niche)
+        save_custom_niches(niches)
+
+
+def remove_custom_niche(niche: str):
+    niches = load_custom_niches()
+    if niche in niches:
+        niches.remove(niche)
+        save_custom_niches(niches)
+
+
+def get_all_niches() -> list[str]:
+    return NICHES + load_custom_niches()
+
+
+def load_custom_languages() -> list[str]:
+    return _load_list(CUSTOM_LANGUAGES_FILE)
+
+
+def save_custom_languages(langs: list[str]):
+    _save_list(CUSTOM_LANGUAGES_FILE, langs)
+
+
+def get_all_languages() -> list[str]:
+    return LANGUAGES + load_custom_languages()
