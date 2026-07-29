@@ -29,21 +29,29 @@ col4.metric("Disputed", ps.get_disputed_count())
 
 act_col1, act_col2, act_col3 = st.columns([1, 1, 1])
 with act_col1:
-    st.toggle("Add payment", key="show_add_payment_toggle", help="Show add payment form")
+    add_btn = st.button("Add payment", use_container_width=True, icon=":material/add:")
+    if add_btn:
+        st.session_state.show_add_payment = not st.session_state.get("show_add_payment", False)
 with act_col2:
+    import_btn = st.button("Import CSV", use_container_width=True, icon=":material/file_upload:")
+with act_col3:
     csv_data = export_payments_to_csv(ps.payments)
     st.download_button("Export CSV", data=csv_data, file_name="payments.csv", mime="text/csv", use_container_width=True, icon=":material/file_download:")
-with act_col3:
-    uploaded = st.file_uploader("Import CSV", type="csv", label_visibility="collapsed")
+
+if import_btn:
+    st.session_state.show_import_pay = not st.session_state.get("show_import_pay", False)
+if st.session_state.get("show_import_pay"):
+    uploaded = st.file_uploader("Import CSV", type="csv", key="pay_csv_import")
     if uploaded:
         content = uploaded.getvalue().decode("utf-8")
         imported = import_payments_from_csv(content)
         for pmt in imported:
             ps.add(pmt)
+        st.session_state.show_import_pay = False
         st.success(f"Imported {len(imported)} payments")
         st.rerun()
 
-if st.session_state.get("show_add_payment_toggle"):
+if st.session_state.get("show_add_payment"):
     with st.container(border=True):
         st.markdown("**Add payment**")
         with st.form("add_payment_form"):

@@ -77,10 +77,20 @@ with right:
                     all_matches.append({"campaign": campaign, "creator": creator, "match": matcher.match(creator, campaign)})
 
         all_matches.sort(key=lambda x: x["match"]["overall_score"], reverse=True)
-        top_matches = all_matches[:30]
+        st.session_state.match_results = all_matches[:30]
+        st.session_state.match_total = len(all_matches)
+        st.session_state.match_cid = cid
+        st.session_state.match_targets = targets
+        st.rerun()
+
+    if st.session_state.get("match_results"):
+        top_matches = st.session_state.match_results
+        total_evaluated = st.session_state.match_total
+        match_cid = st.session_state.match_cid
+        match_targets = st.session_state.match_targets
 
         st.markdown(f"### Top matches")
-        st.caption(f"{len(all_matches)} evaluated, showing top {len(top_matches)}")
+        st.caption(f"{total_evaluated} evaluated, showing top {len(top_matches)}")
 
         bulk_col1, bulk_col2 = st.columns([3, 1])
         with bulk_col1:
@@ -170,7 +180,7 @@ with right:
         if show_board:
             st.divider()
             st.markdown("### Assignment status board")
-            board_targets = targets if cid != "all" else cams.get_active_campaigns()
+            board_targets = match_targets if match_cid != "all" else cams.get_active_campaigns()
             for campaign in board_targets:
                 if not campaign:
                     continue
@@ -200,7 +210,9 @@ st.subheader("Campaign management")
 
 act_col1, act_col2, act_col3 = st.columns([1, 1, 1])
 with act_col1:
-    st.toggle("Add campaign", key="show_add_campaign_toggle")
+    add_btn = st.button("Add campaign", use_container_width=True, icon=":material/add:")
+    if add_btn:
+        st.session_state.show_add_campaign = not st.session_state.get("show_add_campaign", False)
 with act_col2:
     import_btn = st.button("Import CSV", use_container_width=True, icon=":material/file_upload:")
 with act_col3:
@@ -220,7 +232,7 @@ if st.session_state.get("show_import_camp"):
         st.success(f"Imported {len(imported)} campaigns")
         st.rerun()
 
-if st.session_state.get("show_add_campaign_toggle"):
+if st.session_state.get("show_add_campaign"):
     with st.container(border=True):
         st.markdown("**New campaign**")
         with st.form("add_campaign_form"):
@@ -240,7 +252,7 @@ if st.session_state.get("show_add_campaign_toggle"):
                     budget=budget, deadline=deadline.isoformat(),
                     target_niches=target_niches, target_languages=target_languages, status="active",
                 ))
-                st.session_state.show_add_campaign_toggle = False
+                st.session_state.show_add_campaign = False
                 st.rerun()
 
 all_campaigns = cams.campaigns

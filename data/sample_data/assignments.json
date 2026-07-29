@@ -1,0 +1,632 @@
+[
+  {
+    "id": "450aeb0a-6c3e-4cfb-b6e4-9b19ec27c53f",
+    "campaign_id": "CAM-001",
+    "creator_id": "CRE-001",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "c79ce84a-188b-43bd-9135-f980286e2115",
+    "campaign_id": "CAM-001",
+    "creator_id": "CRE-022",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "7a1ee06f-2760-4e33-9681-9bc65319b147",
+    "campaign_id": "CAM-001",
+    "creator_id": "CRE-031",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "65edfe39-180d-4bef-8558-f47f943cfed2",
+    "campaign_id": "CAM-001",
+    "creator_id": "CRE-013",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "5810fcfb-3f5b-488f-bc13-7eeb1ac6029b",
+    "campaign_id": "CAM-002",
+    "creator_id": "CRE-003",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "19ca4f93-a97d-4652-a390-43b1a0ad292a",
+    "campaign_id": "CAM-002",
+    "creator_id": "CRE-016",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "75d2afa9-5b70-431c-9183-2d65a917bc7c",
+    "campaign_id": "CAM-002",
+    "creator_id": "CRE-025",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "f1c040b4-f8b8-4549-a2a8-c68bac15eb24",
+    "campaign_id": "CAM-002",
+    "creator_id": "CRE-028",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "ef2d2363-167d-4150-8ceb-091b463af953",
+    "campaign_id": "CAM-003",
+    "creator_id": "CRE-004",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "00357dea-cce1-4b74-8f46-b7c5fab0d771",
+    "campaign_id": "CAM-003",
+    "creator_id": "CRE-020",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "d7874659-410c-4529-acb4-bda5e0106812",
+    "campaign_id": "CAM-003",
+    "creator_id": "CRE-029",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "bf70550b-4844-4f63-9a14-c73386e41382",
+    "campaign_id": "CAM-003",
+    "creator_id": "CRE-044",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "5461fc2d-9559-4fe8-90b0-daf384f49dc8",
+    "campaign_id": "CAM-004",
+    "creator_id": "CRE-006",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "3e73c500-4876-47d7-82e5-29047a705721",
+    "campaign_id": "CAM-004",
+    "creator_id": "CRE-038",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "75a967d0-074d-4bfb-815b-4bda20353f7d",
+    "campaign_id": "CAM-004",
+    "creator_id": "CRE-043",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "e175b15e-d0cb-47a2-9963-7a75957fbebc",
+    "campaign_id": "CAM-005",
+    "creator_id": "CRE-005",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "8aecee8c-fe6e-4660-b411-c7b0fe77cc83",
+    "campaign_id": "CAM-005",
+    "creator_id": "CRE-032",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "6b4ac708-a4bf-4835-a0b7-c621f641ca0e",
+    "campaign_id": "CAM-005",
+    "creator_id": "CRE-039",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "909b34af-4d74-4c88-91f7-5cc5d062c5e5",
+    "campaign_id": "CAM-006",
+    "creator_id": "CRE-011",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "6e949719-49e4-4142-ba11-5965e4495c7b",
+    "campaign_id": "CAM-006",
+    "creator_id": "CRE-035",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "dadfd16d-1560-42c8-bc0d-391f0e5ae910",
+    "campaign_id": "CAM-006",
+    "creator_id": "CRE-047",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "921f72d3-56a3-4c4c-9a1a-afacf773dd65",
+    "campaign_id": "CAM-007",
+    "creator_id": "CRE-009",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "315ae323-0442-4cbe-b305-4936fee6730c",
+    "campaign_id": "CAM-007",
+    "creator_id": "CRE-019",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "fda7af99-c07d-4e53-be42-cad333ddfd1c",
+    "campaign_id": "CAM-007",
+    "creator_id": "CRE-033",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "96df726e-d415-45ac-8deb-8c469085a547",
+    "campaign_id": "CAM-007",
+    "creator_id": "CRE-045",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "413f47b7-6e2b-4898-b9bc-c167d82e1d2a",
+    "campaign_id": "CAM-008",
+    "creator_id": "CRE-002",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "ef42a8fd-5db8-4c0b-a633-bb32c16842c9",
+    "campaign_id": "CAM-008",
+    "creator_id": "CRE-034",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "113889db-35d8-4468-aca2-3f5217b72977",
+    "campaign_id": "CAM-009",
+    "creator_id": "CRE-013",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "aecedb8f-d654-4665-8638-80fa480282a3",
+    "campaign_id": "CAM-009",
+    "creator_id": "CRE-022",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "b1be4df1-98c9-41ab-9b83-f5f8a290c608",
+    "campaign_id": "CAM-009",
+    "creator_id": "CRE-031",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "36e01c3c-8f8a-4b37-ac42-53671bb0fbd1",
+    "campaign_id": "CAM-010",
+    "creator_id": "CRE-006",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "8f804654-c5d6-4967-ad94-dfa891e885c6",
+    "campaign_id": "CAM-010",
+    "creator_id": "CRE-012",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "4a30b7d4-df26-44a6-8906-43f01f3022d7",
+    "campaign_id": "CAM-010",
+    "creator_id": "CRE-038",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "d9694be2-9811-44ce-ac1a-f655709fe61b",
+    "campaign_id": "CAM-011",
+    "creator_id": "CRE-008",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "59a95cbb-8ba8-44fe-a3f9-2eb5cf6b740a",
+    "campaign_id": "CAM-011",
+    "creator_id": "CRE-036",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "ea9b33c5-d71c-4c41-b497-f1059c14ff80",
+    "campaign_id": "CAM-011",
+    "creator_id": "CRE-050",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "b13d88f0-c904-4df8-8bf8-79fb90a671b6",
+    "campaign_id": "CAM-012",
+    "creator_id": "CRE-010",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "b25f94ae-6f03-493b-8e1e-12912e31c8f5",
+    "campaign_id": "CAM-012",
+    "creator_id": "CRE-042",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "eb32d281-43c8-47e5-a5a2-9246faaede58",
+    "campaign_id": "CAM-012",
+    "creator_id": "CRE-037",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "c4427873-cccb-4330-9b96-862a2cd4ea4f",
+    "campaign_id": "CAM-013",
+    "creator_id": "CRE-015",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "602f712a-3fc2-4479-86d5-a6ec6c71613c",
+    "campaign_id": "CAM-013",
+    "creator_id": "CRE-021",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "3cab18ce-0ca4-4e6d-9b67-5962bb1f67c1",
+    "campaign_id": "CAM-014",
+    "creator_id": "CRE-008",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "e45a9b05-10df-4a44-8503-5a65402545bc",
+    "campaign_id": "CAM-014",
+    "creator_id": "CRE-028",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "d18afc5f-6a93-4054-ba3f-3ac430a6513d",
+    "campaign_id": "CAM-015",
+    "creator_id": "CRE-043",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "24b698b8-49a2-43ca-be93-d1f9235cacb1",
+    "campaign_id": "CAM-015",
+    "creator_id": "CRE-014",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "03020e5f-52d7-4e8a-98e9-568b3325f446",
+    "campaign_id": "CAM-016",
+    "creator_id": "CRE-017",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "b21c9069-62e1-47c5-9f70-d5edfdddab80",
+    "campaign_id": "CAM-016",
+    "creator_id": "CRE-047",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "2a5f6579-6218-4a1b-9f4a-eda1494c69aa",
+    "campaign_id": "CAM-017",
+    "creator_id": "CRE-014",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "0d975e7c-71da-423c-ae15-8f8fea7bdcbc",
+    "campaign_id": "CAM-017",
+    "creator_id": "CRE-046",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "535bfec5-095b-4483-b693-57d3eb572393",
+    "campaign_id": "CAM-018",
+    "creator_id": "CRE-030",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "6fff8cb4-8336-46ea-80a9-3175d0c49fed",
+    "campaign_id": "CAM-018",
+    "creator_id": "CRE-024",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "c4fc8e58-f15b-4128-a19e-7f67d033fa03",
+    "campaign_id": "CAM-018",
+    "creator_id": "CRE-003",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "fdf2fb28-685f-4c91-815e-79a960856cff",
+    "campaign_id": "CAM-019",
+    "creator_id": "CRE-004",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "e5f3f7e9-34ec-4d91-9f3a-ecd89ee84ece",
+    "campaign_id": "CAM-019",
+    "creator_id": "CRE-029",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "2ecd9224-a517-4008-ba0f-c87f4ed5282d",
+    "campaign_id": "CAM-020",
+    "creator_id": "CRE-027",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "62c95023-b26a-487c-ba29-617f83146f8d",
+    "campaign_id": "CAM-020",
+    "creator_id": "CRE-018",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "a2c53640-ddbc-4419-9320-8a4c52162000",
+    "campaign_id": "CAM-021",
+    "creator_id": "CRE-009",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "954558ee-e79e-459f-8070-9499678e976a",
+    "campaign_id": "CAM-021",
+    "creator_id": "CRE-019",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "5155209a-f765-493f-97d4-507dc4f674ca",
+    "campaign_id": "CAM-022",
+    "creator_id": "CRE-004",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "88b9b344-b23e-42c7-a1ab-426b7b3e5003",
+    "campaign_id": "CAM-022",
+    "creator_id": "CRE-020",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "c85583e9-5cf2-4006-8b54-03fe6504dc7f",
+    "campaign_id": "CAM-022",
+    "creator_id": "CRE-029",
+    "status": "matched",
+    "score": 0.0,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "1d696e70-72f0-4fa5-9415-1d01493b49ae",
+    "campaign_id": "CAM-002",
+    "creator_id": "CRE-040",
+    "status": "matched",
+    "score": 6.9,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  },
+  {
+    "id": "32d72c0b-b2f7-4acd-a44a-3e2bf7d929ba",
+    "campaign_id": "CAM-002",
+    "creator_id": "CRE-030",
+    "status": "matched",
+    "score": 6.5,
+    "assigned_at": "2026-07-29",
+    "updated_at": "2026-07-29",
+    "notes": null
+  }
+]
