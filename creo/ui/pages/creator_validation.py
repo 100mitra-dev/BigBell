@@ -141,11 +141,12 @@ with right:
         with col_a:
             st.markdown(f"**{creator.name}**")
             st.markdown(f"{creator.primary_niche} · {creator.primary_language} · {creator.tier}")
-            cols = st.columns(4)
-            cols[0].metric("Followers", f"{creator.total_followers:,}")
-            cols[1].metric("Engagement", f"{creator.avg_engagement_rate}%")
-            cols[2].metric("Quality", f"{creator.content_quality_score}/10")
-            cols[3].metric("Completeness", f"{creator.profile_completeness}%")
+            st.markdown(
+                f":material/people: {creator.total_followers:,}  ·  "
+                f":material/timeline: {creator.avg_engagement_rate}%  ·  "
+                f":material/star: {creator.content_quality_score}/10  ·  "
+                f":material/checklist: {creator.profile_completeness}%"
+            )
             if creator.suggested_tags:
                 st.markdown(" ".join(f":material/tag: `{t}`" for t in creator.suggested_tags))
         with col_b:
