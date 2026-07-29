@@ -17,13 +17,19 @@ class FAQRetriever:
             self._initialized = True
 
     def search(self, query: str, k: int = 5) -> list:
-        self.initialize()
-        retriever = self.vs_manager.get_retriever(k=k)
-        return retriever.invoke(query)
+        try:
+            self.initialize()
+            retriever = self.vs_manager.get_retriever(k=k)
+            return retriever.invoke(query)
+        except Exception:
+            return []
 
     def search_by_category(self, query: str, category: str, k: int = 5) -> list:
-        self.initialize()
-        store = self.vs_manager.get_vector_store()
-        return store.similarity_search(
-            query, k=k, filter={"category": category}
-        )
+        try:
+            self.initialize()
+            store = self.vs_manager.get_vector_store()
+            return store.similarity_search(
+                query, k=k, filter={"category": category}
+            )
+        except Exception:
+            return []

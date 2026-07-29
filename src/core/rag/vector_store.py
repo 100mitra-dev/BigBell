@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from langchain_chroma import Chroma
-from langchain_community.embeddings import FakeEmbeddings
 from langchain_core.vectorstores import VectorStoreRetriever
 
 from src.core.config import VECTOR_STORE_DIR
+from src.core.rag.embeddings import get_embeddings
 
 
 class VectorStoreManager:
@@ -16,10 +16,16 @@ class VectorStoreManager:
             cls._instance = super().__new__(cls)
         return cls._instance
 
+    def reset(self):
+        self._vector_store = None
+        if VECTOR_STORE_DIR.exists():
+            import shutil
+            shutil.rmtree(VECTOR_STORE_DIR)
+
     def get_vector_store(self) -> Chroma:
         if self._vector_store is None:
             VECTOR_STORE_DIR.mkdir(parents=True, exist_ok=True)
-            embeddings = FakeEmbeddings(size=384)
+            embeddings = get_embeddings()
             self._vector_store = Chroma(
                 collection_name="faq_store",
                 embedding_function=embeddings,
@@ -33,9 +39,3 @@ class VectorStoreManager:
     def add_documents(self, documents: list):
         store = self.get_vector_store()
         store.add_documents(documents)
-
-    def reset(self):
-        self._vector_store = None
-        if VECTOR_STORE_DIR.exists():
-            import shutil
-            shutil.rmtree(VECTOR_STORE_DIR)

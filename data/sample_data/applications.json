@@ -47,11 +47,11 @@
     "id": "APP-005",
     "creator_id": "CRE-026",
     "campaign_id": "CAM-006",
-    "status": "pending",
+    "status": "reviewed",
     "applied_at": "2026-07-24",
-    "reviewed_at": null,
-    "score": null,
-    "ai_notes": null,
+    "reviewed_at": "2026-07-29",
+    "score": 6.9,
+    "ai_notes": "Strong niche alignment with EduSmart Learning App Launch | Good content quality | Language mismatch - creator primarily uses Malayalam",
     "reviewer_notes": null
   },
   {

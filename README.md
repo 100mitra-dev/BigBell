@@ -1,65 +1,86 @@
 # Creo — Creator Success AI Platform
 
-An AI-powered platform for creator onboarding, management, and campaign operations. Built with **Streamlit**, **LangChain**, and **Python**.
+AI-powered platform for creator onboarding, management, and campaign operations.
 
-## Features
-
-| Page | Description |
-|------|-------------|
-| **Dashboard** | Executive KPIs, niche distribution, status breakdown, trend charts |
-| **Applications** | AI-powered application review with scoring, risk flags, and recommendations |
-| **Verification** | Automated profile completeness and social media verification |
-| **Categorization** | AI-driven niche and language classification with scoring |
-| **Campaign Matching** | Semantic matching with explainable AI scores |
-| **Creator Queries** | RAG-based chatbot answering FAQs with source citations |
-| **Follow-Ups** | Deadline tracking, deliverable status, automated reminders |
-| **Payments** | Payment status tracking, processing, and dispute resolution |
-| **Creator CRM** | Full creator record management with filters and history |
-
-## Quick Start
+## Quick start
 
 ```bash
 pip install -r requirements.txt
-streamlit run app.py
+streamlit run streamlit_app.py
 ```
 
-The app launches in **mock mode** — fully functional with simulated AI responses.
+The app launches in **mock mode** — fully functional with rule-based AI responses.
 
-## AI Providers
+## AI providers
 
-For real AI features, copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and add your keys:
+Configure via the **Settings** page in the app or set environment variables:
 
-- **OpenAI**: Set `OPENAI_API_KEY` and `AI_PROVIDER=openai`
-- **Google Gemini**: Set `GEMINI_API_KEY` and `AI_PROVIDER=gemini`
+| Provider | Environment | Web UI |
+|----------|-------------|--------|
+| Mock | `AI_PROVIDER=mock` (default) | Fully functional |
+| OpenAI | `AI_PROVIDER=openai` + `OPENAI_API_KEY` | Enter key in Settings |
+| Gemini | `AI_PROVIDER=gemini` + `GEMINI_API_KEY` | Enter key in Settings |
 
-## Project Structure
-
-```
-creo/
-├── app.py                    # Streamlit entry point
-├── pages/                    # 9 multi-page app views
-│   ├── 01_Dashboard.py
-│   ├── 02_Applications.py
-│   └── ...
-├── src/
-│   ├── core/
-│   │   ├── agents/           # LangChain AI agents
-│   │   ├── rag/              # RAG pipeline (ChromaDB)
-│   │   ├── services/         # Data services
-│   │   ├── config.py         # Configuration
-│   │   └── models.py         # Pydantic models
-│   └── utils/                # UI components & helpers
-├── data/
-│   └── sample_data/          # Pre-seeded mock data
-└── .streamlit/
-    └── config.toml           # Theme configuration
+For real semantic search (FAQ chatbot), install sentence-transformers:
+```bash
+pip install sentence-transformers
 ```
 
-## Tech Stack
+## Project structure
 
-- **Frontend**: Streamlit (multi-page, custom theme)
-- **AI Orchestration**: LangChain (LCEL chains)
-- **Vector Store**: ChromaDB (persisted FAQ knowledge base)
-- **Models**: Pydantic v2
-- **Visualization**: Plotly
-- **Data**: JSON-based (no database required)
+```
+streamlit_app.py              # Entry point with navigation
+app_pages/                    # Page modules (operations, management, insights)
+    dashboard.py
+    applications.py
+    verification.py
+    categorization.py
+    campaign_matching.py
+    creator_queries.py
+    follow_ups.py
+    payments.py
+    creator_crm.py
+    settings.py               # Web-based configuration
+app/components/               # Reusable UI building blocks
+    cards.py
+    layout.py
+src/                          # Core library (no streamlit dependency)
+    core/
+        config.py             # Configuration constants
+        models.py             # Pydantic data models
+        runtime_config.py     # Runtime configuration (provider, keys)
+        agents/               # AI agents (review, verify, categorize, match, query)
+        rag/                  # RAG pipeline (embeddings, vector store, retrieval)
+        services/             # Data services (creator, campaign, payment)
+    utils/
+        helpers.py            # JSON I/O, date helpers, search
+data/
+    sample_data/              # 50 creators, 22 campaigns, 30 FAQs, 15 payments
+    vector_store/             # ChromaDB persistence (auto-created)
+```
+
+## Features
+
+- **Applications** — AI review with scoring, risk flags, and recommendations
+- **Verification** — Automated profile and social media verification
+- **Categorization** — AI-driven niche and language classification
+- **Campaign matching** — Multi-factor creator-campaign matchmaking
+- **Creator queries** — RAG-based FAQ chatbot with source citations
+- **Follow-ups** — Deadline tracking and deliverable management
+- **Payments** — Payment status tracking and dispute resolution
+- **Creator CRM** — Full creator record management with history
+- **Settings** — Web-based AI provider configuration
+
+## Architecture
+
+```
+app/ (streamlit UI)  →  app/components/ (reusable widgets)
+                     →  app_pages/ (page modules)
+
+src/ (core library)  →  src/core/agents/ (AI agents)
+                     →  src/core/rag/ (vector search)
+                     →  src/core/services/ (data layer)
+                     →  src/utils/ (helpers)
+```
+
+The `src/` layer has no Streamlit dependency — it can be used independently.
