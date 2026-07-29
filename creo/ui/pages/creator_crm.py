@@ -168,7 +168,9 @@ for creator in creators:
             if creator.platforms:
                 for plat, info in creator.platforms.items():
                     v = ":material/check_circle:" if info.verified else ":material/cancel:"
-                    st.markdown(f"- **{plat.title()}**: {info.handle} ({info.followers:,}) {v}")
+                    url = f"https://{plat}.com/@{info.handle}" if plat.lower() in ("youtube", "instagram") else None
+                    handle = f"[@{info.handle}]({url})" if url else f"@{info.handle}"
+                    st.markdown(f"- **{plat.title()}**: {handle} ({info.followers:,}) {v}")
             else:
                 st.caption("No platforms linked")
         with cx[1]:

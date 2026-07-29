@@ -240,18 +240,19 @@ with right:
                 st.warning(":material/cancel: Not verified")
 
         with vrow1[1]:
-            btn_icon = ":material/verified:" if not creator.verified else ":material/refresh:"
-            if st.button("Run verification", key=f"v_{creator.id}", icon=btn_icon, use_container_width=True):
+            if st.button("Run verification", key=f"v_{creator.id}", icon=":material/verified:", use_container_width=True):
                 with st.spinner(f"Verifying {creator.name}..."):
                     st.session_state[vk] = verifier.verify(creator)
                 st.rerun()
 
         with vrow1[2]:
-            if not creator.verified and st.session_state.get(vk, {}).get("verified"):
-                if st.button("Approve & activate", key=f"ap_{creator.id}", icon=":material/check:", type="primary", use_container_width=True):
+            vresult = st.session_state.get(vk)
+            if vresult and vresult.get("verified"):
+                label = "Update & approve" if creator.verified else "Approve & activate"
+                if st.button(label, key=f"ap_{creator.id}", icon=":material/check:", type="primary", use_container_width=True):
                     creator.verified = True
-                    creator.verification_score = st.session_state[vk].get("overall_score", 0)
-                    creator.verification_issues = st.session_state[vk].get("issues", [])
+                    creator.verification_score = vresult.get("overall_score", 0)
+                    creator.verification_issues = vresult.get("issues", [])
                     creator.verified_at = today_str()
                     cs.update_status(creator.id, CreatorStatus.ACTIVE)
                     cs.repo.save_all(cs.creators)
@@ -278,8 +279,30 @@ with right:
             if vresult.get("platforms"):
                 with st.expander("Platform details", icon=":material/account_circle:"):
                     for plat, pdata in vresult["platforms"].items():
-                        st.write(f"**{plat.title()}**")
+                        url = f"https://{plat}.com/@{pdata.get('handle', '')}" if plat.lower() in ("youtube", "instagram") else None
+                        handle_str = f"[@{pdata.get('handle', '')}]({url})" if url else f"@{pdata.get('handle', '')}"
+                        st.markdown(f"**{plat.title()}** — {handle_str} · {pdata.get('followers', 0):,} followers")
                         st.json(pdata)
+
+        # Manual verification override
+        st.divider()
+        st.markdown("**Manual override**")
+        mo1, mo2 = st.columns(2)
+        with mo1:
+            manual_score = st.number_input("Verification score", min_value=0, max_value=100, value=int(creator.verification_score) or 75, key=f"vs_{creator.id}")
+            manual_verified = st.checkbox("Mark as verified", value=creator.verified, key=f"vchk_{creator.id}")
+        with mo2:
+            manual_issues = st.text_area("Issues (one per line)", value="\n".join(creator.verification_issues) if creator.verification_issues else "", key=f"vi_{creator.id}")
+        if st.button("Apply manual override", key=f"vo_{creator.id}", icon=":material/edit:", use_container_width=True):
+            creator.verified = manual_verified
+            creator.verification_score = float(manual_score)
+            creator.verification_issues = [l.strip() for l in manual_issues.split("\n") if l.strip()]
+            creator.verified_at = today_str()
+            if manual_verified:
+                cs.update_status(creator.id, CreatorStatus.ACTIVE)
+            cs.repo.save_all(cs.creators)
+            st.success(f"Verification override applied for {creator.name}")
+            st.rerun()
 
     # ── TAB: CLASSIFICATION ──
     with detail_tab[2]:

@@ -92,7 +92,11 @@ with right:
                 with row[2]:
                     already = creator.id in campaign.assigned_creators
                     if already:
-                        st.button("Assigned", key=f"ass_{creator.id}_{campaign.id}", icon=":material/check_circle:", disabled=True, use_container_width=True)
+                        if st.button("Unassign", key=f"ass_{creator.id}_{campaign.id}", icon=":material/person_remove:", use_container_width=True):
+                            campaign.assigned_creators.remove(creator.id)
+                            cams.repo.save_all(cams.campaigns)
+                            st.success(f"Unassigned {creator.name}")
+                            st.rerun()
                     else:
                         if st.button("Assign", key=f"ass_{creator.id}_{campaign.id}", icon=":material/person_add:", type="primary", use_container_width=True):
                             campaign.assigned_creators.append(creator.id)
