@@ -18,77 +18,35 @@ cams = st.session_state.cams
 
 matcher = MatchingAgent()
 
-st.title("Campaign matching")
-st.caption("AI-powered creator-campaign matchmaking")
+st.title("Match Creators")
+st.caption("AI-powered creator–campaign matchmaking with assignment")
 
-col1, col2 = st.columns([1, 2])
+m1, m2, m3 = st.columns(3)
+m1.metric("Active campaigns", cams.get_active_count())
+m2.metric("Total creators", len(cs.creators))
+m3.metric("Total budget", f"₹{cams.get_total_budget():,.0f}")
 
-with col1:
-    opts = [("all", "All active campaigns")] + [
-        (c.id, f"{c.title} ({c.brand})") for c in cams.get_active_campaigns()
-    ]
-    selected = st.selectbox("Select campaign", options=opts, format_func=lambda x: x[1])
+left, right = st.columns([1, 2])
 
-    niches = sorted(cs.get_niche_distribution().keys())
-    niche_f = st.selectbox("Filter by niche", ["All"] + niches)
+# ── LEFT: Controls ──
+with left:
+    with st.container(border=True):
+        st.markdown("**Campaign**")
+        opts = [("all", "All active campaigns")] + [
+            (c.id, f"{c.title} ({c.brand})") for c in cams.get_active_campaigns()
+        ]
+        selected = st.selectbox("Select", options=opts, format_func=lambda x: x[1], label_visibility="collapsed")
 
-    langs = sorted(cs.get_language_distribution().keys())
-    lang_f = st.selectbox("Filter by language", ["All"] + langs)
+        st.markdown("**Creator filters**")
+        niches = sorted(cs.get_niche_distribution().keys())
+        niche_f = st.selectbox("Niche", ["All"] + niches, label_visibility="collapsed")
+        langs = sorted(cs.get_language_distribution().keys())
+        lang_f = st.selectbox("Language", ["All"] + langs, label_visibility="collapsed")
+        min_f = st.number_input("Min followers", min_value=0, value=0, step=10000, label_visibility="collapsed")
 
-    min_f = st.number_input("Min followers", min_value=0, value=0, step=10000)
+        run = st.button("Run AI matching", type="primary", icon=":material/target:", use_container_width=True)
 
-    run = st.button("Run AI matching", type="primary", icon=":material/target:", use_container_width=True)
-
-    st.markdown("---")
-    st.subheader("Campaign management")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        st.toggle("Add", key="show_add_campaign_toggle", help="Show add campaign form")
-    with c2:
-        csv_data = export_campaigns_to_csv(cams.campaigns)
-        st.download_button("Export CSV", data=csv_data, file_name="campaigns.csv", mime="text/csv", icon=":material/download:", use_container_width=True)
-
-    uploaded = st.file_uploader("Import campaigns from CSV", type="csv", label_visibility="collapsed")
-    if uploaded:
-        content = uploaded.getvalue().decode("utf-8")
-        imported = import_campaigns_from_csv(content)
-        for camp in imported:
-            cams.add(camp)
-        st.success(f"Imported {len(imported)} campaigns")
-        st.rerun()
-
-    if st.session_state.get("show_add_campaign_toggle"):
-        with st.container(border=True):
-            st.markdown("**Add campaign**")
-            with st.form("add_campaign_form"):
-                title = st.text_input("Campaign title")
-                brand = st.text_input("Brand")
-                description = st.text_area("Description")
-                col_budget, col_deadline = st.columns(2)
-                with col_budget:
-                    budget = st.number_input("Budget (₹)", min_value=0.0, value=10000.0, step=5000.0)
-                with col_deadline:
-                    deadline = st.date_input("Deadline")
-                target_niches = st.multiselect("Target niches", NICHES)
-                target_languages = st.multiselect("Target languages", LANGUAGES)
-                submitted = st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True)
-                if submitted and title and brand:
-                    campaign = Campaign(
-                        id=str(uuid.uuid4()),
-                        title=title,
-                        brand=brand,
-                        description=description,
-                        budget=budget,
-                        deadline=deadline.isoformat(),
-                        target_niches=target_niches,
-                        target_languages=target_languages,
-                        status="active",
-                    )
-                    cams.add(campaign)
-                    st.session_state.show_add_campaign_toggle = False
-                    st.rerun()
-
+# ── RIGHT: Results ──
 pool = cs.creators
 if niche_f != "All":
     pool = [c for c in pool if c.primary_niche == niche_f or niche_f in c.secondary_niches]
@@ -97,98 +55,165 @@ if lang_f != "All":
 if min_f > 0:
     pool = [c for c in pool if c.total_followers >= min_f]
 
-with col2:
+with right:
     if run and selected:
         cid = selected[0]
-        campaigns = cams.get_active_campaigns() if cid == "all" else [cams.get_by_id(cid)]
+        targets = cams.get_active_campaigns() if cid == "all" else [cams.get_by_id(cid)]
 
         all_matches = []
-        for campaign in campaigns:
+        for campaign in targets:
             if not campaign:
                 continue
             with st.spinner(f"Matching for {campaign.title}..."):
                 for creator in pool:
-                    m = matcher.match(creator, campaign)
-                    all_matches.append({"campaign": campaign, "creator": creator, "match": m})
+                    all_matches.append({"campaign": campaign, "creator": creator, "match": matcher.match(creator, campaign)})
 
         all_matches.sort(key=lambda x: x["match"]["overall_score"], reverse=True)
-        st.markdown(f"**Top matches** ({len(all_matches)} evaluated)")
+        st.markdown(f"### Top matches")
+        st.caption(f"{len(all_matches)} evaluated")
 
-        for m in all_matches[:10]:
+        for m in all_matches[:15]:
             campaign = m["campaign"]
             creator = m["creator"]
             match = m["match"]
+            score = match["overall_score"]
 
             with st.container(border=True):
-                c1, c2 = st.columns([2, 2])
-                with c1:
+                row = st.columns([2, 1, 1])
+                with row[0]:
                     st.markdown(f"**{creator.name}**")
-                    st.caption(f"{creator.primary_niche} | {creator.primary_language}")
-                    st.write(f":material/people: {creator.total_followers:,} followers | :material/timeline: {creator.avg_engagement_rate}% engagement")
-                with c2:
-                    score = match["overall_score"]
-                    if score >= 8:
-                        st.success(f"**{score}/10** — {match.get('match_quality', '').title()}")
-                    elif score >= 6:
-                        st.warning(f"**{score}/10** — {match.get('match_quality', '').title()}")
+                    st.caption(f"{creator.primary_niche} · {creator.primary_language}")
+                    st.markdown(f":material/people: {creator.total_followers:,} followers · :material/timeline: {creator.avg_engagement_rate}% engagement")
+                with row[1]:
+                    color = "green" if score >= 8 else "orange" if score >= 6 else "red"
+                    st.markdown(f":material/{'check_circle' if score>=8 else 'warning' if score>=6 else 'error'}:")
+                    st.markdown(f"<span style='font-size:1.5rem;font-weight:700;color:{color}'>{score}/10</span>", unsafe_allow_html=True)
+                    st.markdown(f"*{match.get('match_quality', '').title()}*")
+                with row[2]:
+                    already = creator.id in campaign.assigned_creators
+                    if already:
+                        st.button("Assigned", key=f"ass_{creator.id}_{campaign.id}", icon=":material/check_circle:", disabled=True, use_container_width=True)
                     else:
-                        st.error(f"**{score}/10** — {match.get('match_quality', '').title()}")
+                        if st.button("Assign", key=f"ass_{creator.id}_{campaign.id}", icon=":material/person_add:", type="primary", use_container_width=True):
+                            campaign.assigned_creators.append(creator.id)
+                            cams.repo.save_all(cams.campaigns)
+                            st.success(f"Assigned {creator.name}")
+                            st.rerun()
 
-                    with st.expander("Why this match?", icon=":material/insights:"):
-                        for pt in match.get("alignment_points", []):
-                            st.markdown(f":material/check: {pt}")
-                        st.markdown("**Detailed scores:**")
-                        for k, v in match.items():
-                            if k.endswith("_score") or k.endswith("_overlap"):
-                                label = k.replace("_score", "").replace("_overlap", "").replace("_", " ").title()
-                                st.markdown(f"- {label}: {v}/10")
+                with st.expander("Match breakdown", icon=":material/insights:"):
+                    for pt in match.get("alignment_points", []):
+                        st.markdown(f":material/check: {pt}")
+                    st.markdown("**Scores**")
+                    sc1, sc2, sc3, sc4 = st.columns(4)
+                    sc1.metric("Niche", f'{match.get("niche_overlap", 0)}/10')
+                    sc2.metric("Language", f'{match.get("language_overlap", 0)}/10')
+                    sc3.metric("Engagement", f'{match.get("engagement_score", 0)}/10')
+                    sc4.metric("Quality", f'{match.get("quality_score", 0)}/10')
+                    sc1.metric("Reach", f'{match.get("reach_score", 0)}/10')
+                    sc2.metric("Budget fit", f'{match.get("budget_fit", 0)}/10')
+                    if creator.total_campaigns_completed > 0:
+                        sc3.metric("Avg earnings/ campaign", f"₹{creator.total_earnings / creator.total_campaigns_completed:,.0f}")
 
-                st.caption(f"Campaign: **{campaign.title}** ({campaign.brand}) — ₹{campaign.budget:,.0f}")
-
-                if st.button("Delete campaign", key=f"del_camp_{campaign.id}", icon=":material/delete:"):
-                    cams.delete(campaign.id)
-                    st.rerun()
+                st.caption(f":material/campaign: {campaign.title} ({campaign.brand}) — ₹{campaign.budget:,.0f}")
 
     else:
-        st.info("Select a campaign and click **Run AI matching** to find the best creator matches.")
+        st.info("Select a campaign and filters on the left, then click **Run AI matching**.")
 
-st.subheader("Active campaigns overview")
-active = cams.get_active_campaigns()
-if active:
-    rows = [{"Campaign": c.title, "Brand": c.brand, "Budget": f"₹{c.budget:,.0f}", "Deadline": c.deadline, "Assigned": len(c.assigned_creators)} for c in active]
-    df = pd.DataFrame(rows)
-    st.dataframe(df, hide_index=True)
-    for _, row in df.iterrows():
-        c = cams.get_by_id([x.id for x in active if x.title == row["Campaign"]][0])
-        if c:
-            c1, c2, c3 = st.columns([3, 1, 1])
-            with c2:
-                st.toggle("Edit", key=f"edit_camp_{c.id}", help="Edit this campaign")
-            with c3:
-                if st.button("Delete", key=f"del_camp_overview_{c.id}", icon=":material/delete:"):
-                    cams.delete(c.id)
-                    st.rerun()
+# ── CAMPAIGN MANAGEMENT ──
+st.divider()
+st.subheader("Campaign management")
 
-            if st.session_state.get(f"edit_camp_{c.id}"):
-                with st.container(border=True):
-                    st.markdown(f"**Edit: {c.title}**")
-                    with st.form(f"edit_camp_form_{c.id}"):
+act_col1, act_col2, act_col3 = st.columns([1, 1, 1])
+with act_col1:
+    st.toggle("Add campaign", key="show_add_campaign_toggle")
+with act_col2:
+    import_btn = st.button("Import CSV", use_container_width=True, icon=":material/file_upload:")
+with act_col3:
+    csv_data = export_campaigns_to_csv(cams.campaigns)
+    st.download_button("Export CSV", data=csv_data, file_name="campaigns.csv", mime="text/csv", use_container_width=True, icon=":material/file_download:")
+
+if import_btn:
+    st.session_state.show_import_camp = not st.session_state.get("show_import_camp", False)
+if st.session_state.get("show_import_camp"):
+    uploaded = st.file_uploader("Import CSV", type="csv", key="camp_csv_import")
+    if uploaded:
+        content = uploaded.getvalue().decode("utf-8")
+        imported = import_campaigns_from_csv(content)
+        for camp in imported:
+            cams.add(camp)
+        st.session_state.show_import_camp = False
+        st.success(f"Imported {len(imported)} campaigns")
+        st.rerun()
+
+if st.session_state.get("show_add_campaign_toggle"):
+    with st.container(border=True):
+        st.markdown("**New campaign**")
+        with st.form("add_campaign_form"):
+            col_a, col_b = st.columns(2)
+            with col_a:
+                title = st.text_input("Campaign title")
+                brand = st.text_input("Brand")
+                budget = st.number_input("Budget (₹)", min_value=0.0, value=10000.0, step=5000.0)
+            with col_b:
+                deadline = st.date_input("Deadline")
+                target_niches = st.multiselect("Target niches", NICHES)
+                target_languages = st.multiselect("Target languages", LANGUAGES)
+            description = st.text_area("Description")
+            if st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True) and title and brand:
+                cams.add(Campaign(
+                    id=str(uuid.uuid4()), title=title, brand=brand, description=description,
+                    budget=budget, deadline=deadline.isoformat(),
+                    target_niches=target_niches, target_languages=target_languages, status="active",
+                ))
+                st.session_state.show_add_campaign_toggle = False
+                st.rerun()
+
+all_campaigns = cams.campaigns
+if all_campaigns:
+    camp_data = []
+    for c in all_campaigns:
+        camp_data.append({
+            "ID": c.id, "Title": c.title, "Brand": c.brand,
+            "Budget": f"₹{c.budget:,.0f}", "Deadline": c.deadline,
+            "Status": c.status, "Assigned": len(c.assigned_creators),
+        })
+    df = pd.DataFrame(camp_data)
+    st.dataframe(df, hide_index=True, use_container_width=True)
+
+    for c in all_campaigns:
+        cc1, cc2, cc3 = st.columns([4, 1, 1])
+        with cc1:
+            st.caption(f"**{c.title}** ({c.brand}) — {c.status} — {len(c.assigned_creators)} assigned")
+        with cc2:
+            edit_on = st.toggle("Edit", key=f"ec_{c.id}")
+        with cc3:
+            if st.button("Delete", key=f"dc_{c.id}", icon=":material/delete:", use_container_width=True):
+                cams.delete(c.id)
+                st.rerun()
+
+        if edit_on:
+            with st.container(border=True):
+                with st.form(f"edit_{c.id}"):
+                    e1, e2 = st.columns(2)
+                    with e1:
                         e_title = st.text_input("Title", value=c.title)
                         e_brand = st.text_input("Brand", value=c.brand)
-                        e_desc = st.text_area("Description", value=c.description)
                         e_budget = st.number_input("Budget (₹)", min_value=0.0, value=c.budget, step=5000.0)
+                    with e2:
                         e_deadline = st.date_input("Deadline", value=pd.to_datetime(c.deadline).date() if c.deadline else None)
                         e_niches = st.multiselect("Target niches", NICHES, default=c.target_niches)
                         e_langs = st.multiselect("Target languages", LANGUAGES, default=c.target_languages)
-                        saved = st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True)
-                        if saved:
-                            c.title = e_title
-                            c.brand = e_brand
-                            c.description = e_desc
-                            c.budget = e_budget
-                            c.deadline = e_deadline.isoformat() if e_deadline else c.deadline
-                            c.target_niches = e_niches
-                            c.target_languages = e_langs
-                            cams.repo.save_all(cams.campaigns)
-                            st.session_state[f"edit_camp_{c.id}"] = False
-                            st.rerun()
+                    e_desc = st.text_area("Description", value=c.description)
+                    if st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True):
+                        c.title = e_title
+                        c.brand = e_brand
+                        c.description = e_desc
+                        c.budget = e_budget
+                        c.deadline = e_deadline.isoformat() if e_deadline else c.deadline
+                        c.target_niches = e_niches
+                        c.target_languages = e_langs
+                        cams.repo.save_all(cams.campaigns)
+                        st.session_state[f"ec_{c.id}"] = False
+                        st.rerun()
+else:
+    st.info("No campaigns yet. Add one above.", icon=":material/inbox:")

@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.logo("creo/ui/components/logo.svg", size="medium")
+st.logo("creo/ui/components/logo.svg", size="large")
 
 from creo.ui.components.layout import init_app_state, sync_config, render_sidebar_stats
 
@@ -44,23 +44,25 @@ with st.sidebar:
         render_sidebar_stats()
 
 page = st.navigation({
-    "Operations": [
-        st.Page("creo/ui/pages/applications.py", title="Applications", icon=":material/description:"),
-        st.Page("creo/ui/pages/verification.py", title="Verification", icon=":material/verified:"),
-        st.Page("creo/ui/pages/categorization.py", title="Categorization", icon=":material/label:"),
+    "Overview": [
+        st.Page("creo/ui/pages/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
     ],
-    "Management": [
-        st.Page("creo/ui/pages/campaign_matching.py", title="Campaign matching", icon=":material/target:"),
-        st.Page("creo/ui/pages/follow_ups.py", title="Follow-ups", icon=":material/calendar_clock:"),
+    "Creators": [
+        st.Page("creo/ui/pages/creator_crm.py", title="All Creators", icon=":material/group:"),
+        st.Page("creo/ui/pages/creator_validation.py", title="Review & Classify", icon=":material/verified:"),
+    ],
+    "Campaigns": [
+        st.Page("creo/ui/pages/campaign_matching.py", title="Match Creators", icon=":material/target:"),
+        st.Page("creo/ui/pages/follow_ups.py", title="Deadlines & Notes", icon=":material/calendar_clock:"),
+    ],
+    "Finance": [
         st.Page("creo/ui/pages/payments.py", title="Payments", icon=":material/payments:"),
     ],
-    "Insights": [
-        st.Page("creo/ui/pages/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
-        st.Page("creo/ui/pages/creator_crm.py", title="Creator CRM", icon=":material/group:"),
-        st.Page("creo/ui/pages/creator_queries.py", title="Creator queries", icon=":material/chat:"),
+    "AI Tools": [
+        st.Page("creo/ui/pages/creator_queries.py", title="AI Helpdesk", icon=":material/chat:"),
     ],
-    "Configuration": [
-        st.Page("creo/ui/pages/settings.py", title="Settings", icon=":material/settings:"),
+    "Settings": [
+        st.Page("creo/ui/pages/settings.py", title="Configure", icon=":material/settings:"),
     ],
 }, position="sidebar")
 

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from creo.models import Creator, Campaign, Payment
+from creo.models import Creator, Campaign, Payment, FollowUpNote
 from creo.runtime_config import get_data_source
 
 
@@ -81,3 +81,28 @@ def get_payment_repo() -> PaymentRepository:
         return WhatsAppPaymentRepository()
     from creo.storage.json.payment_repo import JsonPaymentRepository
     return JsonPaymentRepository()
+
+
+class FollowUpNoteRepository(ABC):
+    @abstractmethod
+    def list_all(self) -> list[FollowUpNote]: ...
+
+    @abstractmethod
+    def get_by_id(self, note_id: str) -> Optional[FollowUpNote]: ...
+
+    @abstractmethod
+    def get_for_campaign(self, campaign_id: str) -> list[FollowUpNote]: ...
+
+    @abstractmethod
+    def add(self, note: FollowUpNote): ...
+
+    @abstractmethod
+    def delete(self, note_id: str): ...
+
+    @abstractmethod
+    def save_all(self, notes: list[FollowUpNote]): ...
+
+
+def get_follow_up_note_repo() -> FollowUpNoteRepository:
+    from creo.storage.json.note_repo import JsonFollowUpNoteRepository
+    return JsonFollowUpNoteRepository()

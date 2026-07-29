@@ -31,9 +31,4 @@ def creator_card(creator, compact: bool = False):
 
 
 def empty_state(message: str):
-    st.html(
-        f"""<div style="text-align:center;padding:3rem 1rem;color:#888;">
-            <span style="font-size:2rem;">:material/info:</span>
-            <p style="margin-top:0.5rem;">{message}</p>
-        </div>"""
-    )
+    st.info(message, icon=":material/info:")

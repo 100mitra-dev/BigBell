@@ -27,14 +27,14 @@ col2.metric("Pending", ps.get_pending_count(), f"₹{ps.get_total_pending_amount
 col3.metric("Paid", ps.get_paid_count(), f"₹{ps.get_total_paid_amount():,.0f}")
 col4.metric("Disputed", ps.get_disputed_count())
 
-tool1, tool2, tool3 = st.columns([1, 1, 2])
-with tool1:
+act_col1, act_col2, act_col3 = st.columns([1, 1, 1])
+with act_col1:
     st.toggle("Add payment", key="show_add_payment_toggle", help="Show add payment form")
-with tool2:
+with act_col2:
     csv_data = export_payments_to_csv(ps.payments)
-    st.download_button("Export CSV", data=csv_data, file_name="payments.csv", mime="text/csv", icon=":material/download:", use_container_width=True)
-with tool3:
-    uploaded = st.file_uploader("Import payments from CSV", type="csv", label_visibility="collapsed")
+    st.download_button("Export CSV", data=csv_data, file_name="payments.csv", mime="text/csv", use_container_width=True, icon=":material/file_download:")
+with act_col3:
+    uploaded = st.file_uploader("Import CSV", type="csv", label_visibility="collapsed")
     if uploaded:
         content = uploaded.getvalue().decode("utf-8")
         imported = import_payments_from_csv(content)
@@ -74,7 +74,7 @@ if st.session_state.get("show_add_payment_toggle"):
                 st.session_state.show_add_payment_toggle = False
                 st.rerun()
 
-tab1, tab2, tab3 = st.tabs(["All payments", "Pending payments", "Disputed"])
+tab1, tab2, tab3, tab4 = st.tabs(["All payments", "Pending payments", "Disputed", "Per-creator payouts"])
 
 with tab1:
     rows = []
@@ -91,7 +91,11 @@ with tab1:
         })
     st.dataframe(pd.DataFrame(rows), hide_index=True)
     for p in ps.payments:
+        creator = cs.get_by_id(p.creator_id)
+        campaign = cams.get_by_id(p.campaign_id)
         c1, c2, c3 = st.columns([3, 1, 1])
+        with c1:
+            st.caption(f"{creator.name if creator else 'Unknown'} — {campaign.title if campaign else 'Unknown'} — ₹{p.amount:,.0f}")
         with c2:
             st.toggle("Edit", key=f"edit_pay_{p.id}", help="Edit this payment")
         with c3:
@@ -169,3 +173,48 @@ with tab3:
                     if st.button("Resolve — mark as processed", key=f"rproc_{p.id}", icon=":material/done_all:", use_container_width=True):
                         ps.update_status(p.id, "processed")
                         st.rerun()
+
+with tab4:
+    st.markdown("**Per-creator payout summary**")
+    creator_totals = {}
+    for p in ps.payments:
+        creator = cs.get_by_id(p.creator_id)
+        name = creator.name if creator else p.creator_id
+        if name not in creator_totals:
+            creator_totals[name] = {"total": 0, "paid": 0, "pending": 0, "count": 0}
+        creator_totals[name]["total"] += p.amount
+        creator_totals[name]["count"] += 1
+        if p.status == "paid":
+            creator_totals[name]["paid"] += p.amount
+        elif p.status == "pending":
+            creator_totals[name]["pending"] += p.amount
+
+    if creator_totals:
+        rows = []
+        for name, vals in sorted(creator_totals.items(), key=lambda x: -x[1]["total"]):
+            rows.append({
+                "Creator": name,
+                "Payments": vals["count"],
+                "Total": f"₹{vals['total']:,.0f}",
+                "Paid": f"₹{vals['paid']:,.0f}",
+                "Pending": f"₹{vals['pending']:,.0f}",
+            })
+        st.dataframe(pd.DataFrame(rows), hide_index=True)
+
+        st.divider()
+        st.markdown("**Creator payout detail**")
+        selected_creator = st.selectbox("Select creator", options=sorted(creator_totals.keys()))
+        if selected_creator:
+            creator_payments = [p for p in ps.payments if cs.get_by_id(p.creator_id) and cs.get_by_id(p.creator_id).name == selected_creator]
+            detail_rows = []
+            for p in creator_payments:
+                campaign = cams.get_by_id(p.campaign_id)
+                detail_rows.append({
+                    "Campaign": campaign.title if campaign else "Unknown",
+                    "Amount": f"₹{p.amount:,.0f}",
+                    "Status": p.status,
+                    "Due": p.due_date,
+                })
+            st.dataframe(pd.DataFrame(detail_rows), hide_index=True)
+    else:
+        st.info("No payment data available.", icon=":material/info:")

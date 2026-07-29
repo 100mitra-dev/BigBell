@@ -179,11 +179,11 @@
     "id": "APP-017",
     "creator_id": "CRE-018",
     "campaign_id": "CAM-020",
-    "status": "pending",
+    "status": "shortlisted",
     "applied_at": "2026-07-24",
-    "reviewed_at": null,
-    "score": null,
-    "ai_notes": null,
+    "reviewed_at": "2026-07-29",
+    "score": 8.3,
+    "ai_notes": "Strong niche alignment with PopFizz Beverage Summer Campaign | Good content quality | Language mismatch - creator primarily uses Haryanvi",
     "reviewer_notes": null
   },
   {

@@ -35,6 +35,12 @@ class Creator(BaseModel):
     total_campaigns_completed: int = 0
     total_earnings: float = 0.0
     notes: Optional[str] = None
+    verified: bool = False
+    verification_score: float = 0.0
+    verification_issues: list[str] = []
+    verified_at: Optional[str] = None
+    suggested_tags: list[str] = []
+    classified_at: Optional[str] = None
 
     @property
     def total_followers(self) -> int:
@@ -103,3 +109,10 @@ class Payment(BaseModel):
     due_date: str = ""
     processed_at: Optional[str] = None
     notes: Optional[str] = None
+
+
+class FollowUpNote(BaseModel):
+    id: str
+    campaign_id: str
+    note: str
+    created_at: str = ""
