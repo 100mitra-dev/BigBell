@@ -8,6 +8,8 @@ _RUNTIME_CONFIG = {
     "provider": AI_PROVIDER,
     "openai_key": OPENAI_API_KEY,
     "gemini_key": GEMINI_API_KEY,
+    "openai_model": "gpt-4o",
+    "gemini_model": "gemini-1.5-pro",
     "youtube_key": "",
     "instagram_key": "",
     "whatsapp_key": "",
@@ -19,6 +21,8 @@ _ENV_MAP = {
     "provider": "AI_PROVIDER",
     "openai_key": "OPENAI_API_KEY",
     "gemini_key": "GEMINI_API_KEY",
+    "openai_model": "OPENAI_MODEL",
+    "gemini_model": "GEMINI_MODEL",
     "youtube_key": "YOUTUBE_API_KEY",
     "instagram_key": "INSTAGRAM_API_KEY",
     "whatsapp_key": "WHATSAPP_API_KEY",
@@ -93,6 +97,22 @@ def get_whatsapp_key() -> str:
 
 def set_whatsapp_key(key: str):
     _RUNTIME_CONFIG["whatsapp_key"] = key
+
+
+def get_openai_model() -> str:
+    return _RUNTIME_CONFIG.get("openai_model", "gpt-4o")
+
+
+def set_openai_model(model: str):
+    _RUNTIME_CONFIG["openai_model"] = model
+
+
+def get_gemini_model() -> str:
+    return _RUNTIME_CONFIG.get("gemini_model", "gemini-1.5-pro")
+
+
+def set_gemini_model(model: str):
+    _RUNTIME_CONFIG["gemini_model"] = model
 
 
 def get_debug_logging() -> bool:

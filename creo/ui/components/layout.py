@@ -4,6 +4,8 @@ CONFIG_DEFAULTS = {
     "provider": "mock",
     "openai_key": "",
     "gemini_key": "",
+    "openai_model": "gpt-4o",
+    "gemini_model": "gemini-1.5-pro",
     "debug_logging": False,
 }
 

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from creo.runtime_config import get_provider, get_openai_key, get_gemini_key
+from creo.runtime_config import get_provider, get_openai_key, get_gemini_key, get_openai_model, get_gemini_model
 from creo.debug_logger import APILogEntry, add_log
 
 logger = logging.getLogger(__name__)
@@ -23,14 +23,14 @@ class BaseAgent:
     def _get_llm(self):
         if self.use_openai:
             from langchain_openai import ChatOpenAI
-            from creo.config import OPENAI_MODEL
-            logger.debug("Using OpenAI LLM (%s)", OPENAI_MODEL)
-            return ChatOpenAI(model=OPENAI_MODEL, api_key=get_openai_key(), temperature=0.3)
+            model = get_openai_model()
+            logger.debug("Using OpenAI LLM (%s)", model)
+            return ChatOpenAI(model=model, api_key=get_openai_key(), temperature=0.3)
         elif self.use_gemini:
             from langchain_google_genai import ChatGoogleGenerativeAI
-            from creo.config import GEMINI_MODEL
-            logger.debug("Using Gemini LLM (%s)", GEMINI_MODEL)
-            return ChatGoogleGenerativeAI(model=GEMINI_MODEL, google_api_key=get_gemini_key(), temperature=0.3)
+            model = get_gemini_model()
+            logger.debug("Using Gemini LLM (%s)", model)
+            return ChatGoogleGenerativeAI(model=model, google_api_key=get_gemini_key(), temperature=0.3)
         return None
 
     def _run_llm_chain(self, prompt: str) -> str | None:

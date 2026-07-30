@@ -6,6 +6,42 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_OPENAI_MODELS = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]
+DEFAULT_GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.0-pro"]
+
+
+@st.cache_data(ttl=300)
+def _fetch_openai_models(api_key: str) -> list[str]:
+    if not api_key:
+        return DEFAULT_OPENAI_MODELS
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        models = [m.id for m in client.models.list() if m.id.startswith("gpt-")]
+        return sorted(models, reverse=True) if models else DEFAULT_OPENAI_MODELS
+    except Exception as e:
+        logger.warning("Failed to fetch OpenAI models: %s", e)
+        return DEFAULT_OPENAI_MODELS
+
+
+@st.cache_data(ttl=300)
+def _fetch_gemini_models(api_key: str) -> list[str]:
+    if not api_key:
+        return DEFAULT_GEMINI_MODELS
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        models = [
+            m.name.removeprefix("models/")
+            for m in genai.list_models()
+            if "generateContent" in m.supported_generation_methods
+        ]
+        return sorted(models, reverse=True) if models else DEFAULT_GEMINI_MODELS
+    except Exception as e:
+        logger.warning("Failed to fetch Gemini models: %s", e)
+        return DEFAULT_GEMINI_MODELS
+
+
 st.title("Settings")
 st.caption("Configure AI providers, API keys, and data sources")
 try:
@@ -26,6 +62,20 @@ try:
                 placeholder="sk-...",
                 on_change=sync_config,
             )
+
+            def _on_openai_model():
+                from creo.runtime_config import set_openai_model, persist_config
+                set_openai_model(st.session_state.openai_model)
+                persist_config()
+
+            openai_models = _fetch_openai_models(st.session_state.openai_key)
+            st.selectbox(
+                "Model",
+                options=openai_models,
+                key="openai_model",
+                on_change=_on_openai_model,
+                help="OpenAI chat model to use for AI features",
+            )
         elif p == "gemini":
             st.text_input(
                 "Gemini API key",
@@ -33,6 +83,20 @@ try:
                 type="password",
                 placeholder="Your Gemini key",
                 on_change=sync_config,
+            )
+
+            def _on_gemini_model():
+                from creo.runtime_config import set_gemini_model, persist_config
+                set_gemini_model(st.session_state.gemini_model)
+                persist_config()
+
+            gemini_models = _fetch_gemini_models(st.session_state.gemini_key)
+            st.selectbox(
+                "Model",
+                options=gemini_models,
+                key="gemini_model",
+                on_change=_on_gemini_model,
+                help="Gemini model to use for AI features",
             )
 
         if p == "openai" and st.session_state.openai_key:
@@ -156,8 +220,8 @@ try:
         **Creo** is an AI-powered platform for creator onboarding, management, and campaign operations.
 
         - **Mock mode** — fully functional with simulated AI responses
-        - **OpenAI** — uses GPT-4o for review, matching, and query answering
-        - **Gemini** — uses Google Gemini 1.5 Pro for AI features
+        - **OpenAI** — configurable model selection (default: GPT-4o)
+        - **Gemini** — configurable model selection (default: Gemini 1.5 Pro)
 
         Configuration is persisted to `.env` (excluded from version control).
         """)
