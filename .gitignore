@@ -6,5 +6,6 @@ wheels/
 *.egg-info
 .venv
 .streamlit/secrets.toml
+.env
 data/vector_store/
 *.db

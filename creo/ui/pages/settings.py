@@ -18,25 +18,22 @@ try:
         st.markdown(f"**Current provider:** {icons.get(p, '')} {p.title()}")
         st.caption("Change the provider in the sidebar")
 
-        st.text_input(
-            "OpenAI API key",
-            key="openai_key",
-            type="password",
-            placeholder="sk-...",
-            on_change=sync_config,
-            label_visibility="collapsed" if p != "openai" else "visible",
-            disabled=p != "openai",
-        )
-
-        st.text_input(
-            "Gemini API key",
-            key="gemini_key",
-            type="password",
-            placeholder="Your Gemini key",
-            on_change=sync_config,
-            label_visibility="collapsed" if p != "gemini" else "visible",
-            disabled=p != "gemini",
-        )
+        if p == "openai":
+            st.text_input(
+                "OpenAI API key",
+                key="openai_key",
+                type="password",
+                placeholder="sk-...",
+                on_change=sync_config,
+            )
+        elif p == "gemini":
+            st.text_input(
+                "Gemini API key",
+                key="gemini_key",
+                type="password",
+                placeholder="Your Gemini key",
+                on_change=sync_config,
+            )
 
         if p == "openai" and st.session_state.openai_key:
             st.success(":material/check_circle: OpenAI configured and ready")
@@ -107,6 +104,53 @@ try:
                 st.warning("Niche already exists")
 
     with st.container(border=True):
+        st.subheader("Developer tools")
+        st.caption("Debug logging for API calls")
+
+        def _on_debug_toggle():
+            from creo.runtime_config import set_debug_logging, persist_config
+            set_debug_logging(st.session_state.debug_logging)
+            persist_config()
+
+        st.toggle(
+            "Enable debug API logging",
+            key="debug_logging",
+            on_change=_on_debug_toggle,
+            help="Logs all LLM API calls with timing and previews. View logs in the API Logs page.",
+        )
+        if st.session_state.debug_logging:
+            count = len(st.session_state.get("api_logs", []))
+            st.caption(f"{count} log entries captured so far")
+            if count > 0 and st.button("Clear logs", icon=":material/delete_sweep:"):
+                from creo.debug_logger import clear_logs
+                clear_logs()
+                st.rerun()
+
+
+    with st.container(border=True):
+        st.subheader("Mock data")
+        st.caption("Reset sample data to default state after testing")
+
+        with st.popover("Reset all mock data", icon=":material/refresh:"):
+            st.warning("This will permanently discard all changes to sample data.")
+            st.caption("Creators, campaigns, payments, applications, assignments, and notes will be restored to defaults.")
+            if st.button("Yes, reset everything", type="primary", use_container_width=True):
+                import subprocess
+                from creo.config import ROOT_DIR
+                try:
+                    subprocess.run(
+                        ["git", "checkout", "--", "data/sample_data/"],
+                        cwd=str(ROOT_DIR),
+                        capture_output=True, text=True, check=True,
+                    )
+                    st.success("Mock data reset to defaults")
+                    st.rerun()
+                except subprocess.CalledProcessError as e:
+                    st.error(f"Reset failed: {e.stderr or e.stdout}")
+                except FileNotFoundError:
+                    st.error("git not found — cannot reset")
+
+    with st.container(border=True):
         st.subheader("About Creo")
         st.markdown("""
         **Creo** is an AI-powered platform for creator onboarding, management, and campaign operations.
@@ -115,7 +159,7 @@ try:
         - **OpenAI** — uses GPT-4o for review, matching, and query answering
         - **Gemini** — uses Google Gemini 1.5 Pro for AI features
 
-        Configuration is persisted to `.streamlit/secrets.toml` (excluded from version control).
+        Configuration is persisted to `.env` (excluded from version control).
         """)
 
 except Exception as e:

@@ -63,6 +63,7 @@ page = st.navigation({
     ],
     "Settings": [
         st.Page("creo/ui/pages/settings.py", title="Configure", icon=":material/settings:"),
+        st.Page("creo/ui/pages/api_logs.py", title="API Logs", icon=":material/list_alt:"),
     ],
 }, position="sidebar")
 

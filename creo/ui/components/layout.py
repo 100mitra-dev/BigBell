@@ -4,6 +4,7 @@ CONFIG_DEFAULTS = {
     "provider": "mock",
     "openai_key": "",
     "gemini_key": "",
+    "debug_logging": False,
 }
 
 
@@ -11,17 +12,17 @@ def init_app_state():
     from creo.runtime_config import _RUNTIME_CONFIG, load_persisted_config
     load_persisted_config()
     for key, default in CONFIG_DEFAULTS.items():
-        if key not in st.session_state:
-            st.session_state[key] = _RUNTIME_CONFIG.get(key, default)
+        st.session_state[key] = _RUNTIME_CONFIG.get(key, default)
 
 
 def sync_config():
     from creo.runtime_config import (
-        set_provider, set_openai_key, set_gemini_key,
+        set_provider, set_openai_key, set_gemini_key, persist_config,
     )
     set_provider(st.session_state.provider)
     set_openai_key(st.session_state.openai_key)
     set_gemini_key(st.session_state.gemini_key)
+    persist_config()
 
 
 def render_sidebar_stats():
