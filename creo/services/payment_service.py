@@ -1,13 +1,17 @@
+import logging
 from typing import Optional
 
 from creo.storage.base import get_payment_repo
 from creo.models import Payment
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentService:
     def __init__(self):
         self._payments: list[Payment] = []
         self.repo = get_payment_repo()
+        logger.debug("PaymentService initialized")
 
     @property
     def payments(self) -> list[Payment]:
@@ -27,10 +31,12 @@ class PaymentService:
     def add(self, payment: Payment):
         self.repo.add(payment)
         self.refresh()
+        logger.info("Added payment %s (creator=%s, amount=%.2f)", payment.id, payment.creator_id, payment.amount)
 
     def delete(self, payment_id: str):
         self.repo.delete(payment_id)
         self.refresh()
+        logger.info("Deleted payment %s", payment_id)
 
     def filter_by_status(self, status: str) -> list[Payment]:
         return [p for p in self.payments if p.status == status]
@@ -64,3 +70,4 @@ class PaymentService:
         if payment:
             payment.status = status
             self.repo.save_all(self.payments)
+            logger.info("Updated payment %s status to %s", payment_id, status)

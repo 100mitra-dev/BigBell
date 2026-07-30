@@ -1,14 +1,18 @@
+import logging
 import random
 from typing import Optional
 
 from creo.storage.base import get_creator_repo
 from creo.models import Creator, CreatorStatus
 
+logger = logging.getLogger(__name__)
+
 
 class CreatorService:
     def __init__(self):
         self._creators: list[Creator] = []
         self.repo = get_creator_repo()
+        logger.debug("CreatorService initialized")
 
     @property
     def creators(self) -> list[Creator]:
@@ -28,10 +32,12 @@ class CreatorService:
     def add(self, creator: Creator):
         self.repo.add(creator)
         self.refresh()
+        logger.info("Added creator %s (%s)", creator.id, creator.name)
 
     def delete(self, creator_id: str):
         self.repo.delete(creator_id)
         self.refresh()
+        logger.info("Deleted creator %s", creator_id)
 
     def search(self, query: str = "") -> list[Creator]:
         if not query:
@@ -65,6 +71,7 @@ class CreatorService:
         if creator:
             creator.status = status
             self.repo.save_all(self.creators)
+            logger.info("Updated creator %s status to %s", creator_id, status.value)
 
     def update_profile_completeness(self, creator_id: str, value: float):
         creator = self.get_by_id(creator_id)

@@ -1,13 +1,16 @@
-import random
+import logging
 
 from creo.agents.base import BaseAgent
 from creo.models import Creator
+
+logger = logging.getLogger(__name__)
 
 
 class VerificationAgent(BaseAgent):
     def verify(self, creator: Creator) -> dict:
         if self.use_mock:
             return self._mock_verify(creator)
+        logger.debug("AI verifying creator %s", creator.id)
         return self._ai_verify(creator)
 
     def _mock_verify(self, creator: Creator) -> dict:
@@ -29,23 +32,20 @@ class VerificationAgent(BaseAgent):
                 "handle": info.handle,
                 "followers": info.followers,
                 "verified": info.verified,
-                "exists": random.random() > 0.05,
-                "active_recently": random.random() > 0.1,
-                "suspicious_activity": random.random() > 0.95,
+                "exists": True,
+                "active_recently": True,
+                "suspicious_activity": False,
             }
         checks["platforms"] = platform_results
 
-        follower_growth = []
-        for _ in range(3):
-            change = random.uniform(-2, 8)
-            follower_growth.append(round(change, 1))
+        follower_growth = [3.5, 2.1, 4.8]
         checks["follower_growth_rate"] = follower_growth
 
         content_quality = {
             "score": creator.content_quality_score,
-            "consistency": round(random.uniform(6, 10), 1),
-            "originality": round(random.uniform(6, 10), 1),
-            "audience_match": round(random.uniform(5, 10), 1),
+            "consistency": round(creator.content_quality_score * 0.9, 1),
+            "originality": round(creator.content_quality_score * 0.85, 1),
+            "audience_match": round(creator.content_quality_score * 0.8, 1),
         }
         checks["content_quality"] = content_quality
 
@@ -98,5 +98,6 @@ Return ONLY valid JSON, no markdown formatting."""
         try:
             import json
             return json.loads(result.strip().removeprefix("```json").removesuffix("```").strip())
-        except Exception:
+        except Exception as e:
+            logger.error("AI verification failed, falling back to mock: %s", e)
             return self._mock_verify(creator)

@@ -1,9 +1,12 @@
+import logging
 from typing import Optional
 import uuid
 
 from creo.storage.base import get_assignment_repo
 from creo.models import CampaignAssignment, AssignmentStatus
 from creo.utils.helpers import today_str
+
+logger = logging.getLogger(__name__)
 
 
 NEXT_STATUS: dict[AssignmentStatus, Optional[AssignmentStatus]] = {
@@ -40,6 +43,7 @@ class AssignmentService:
     def __init__(self):
         self._assignments: list[CampaignAssignment] = []
         self.repo = get_assignment_repo()
+        logger.debug("AssignmentService initialized")
 
     @property
     def assignments(self) -> list[CampaignAssignment]:
@@ -79,6 +83,7 @@ class AssignmentService:
         )
         self.repo.add(assignment)
         self.refresh()
+        logger.info("Assigned creator %s to campaign %s (score=%.1f)", creator_id, campaign_id, score)
         return assignment
 
     def unassign(self, campaign_id: str, creator_id: str):
@@ -86,6 +91,7 @@ class AssignmentService:
         if existing:
             self.repo.delete(existing.id)
             self.refresh()
+            logger.info("Unassigned creator %s from campaign %s", creator_id, campaign_id)
 
     def update_status(self, assignment_id: str, new_status: AssignmentStatus):
         all_a = self.repo.list_all()
@@ -100,10 +106,12 @@ class AssignmentService:
     def advance_status(self, assignment_id: str) -> Optional[AssignmentStatus]:
         a = self.repo.get_by_id(assignment_id)
         if not a:
+            logger.warning("advance_status: assignment %s not found", assignment_id)
             return None
         nxt = NEXT_STATUS.get(a.status)
         if nxt:
             self.update_status(assignment_id, nxt)
+            logger.info("Advanced assignment %s from %s to %s", assignment_id, a.status.value, nxt.value)
         return nxt
 
     def get_campaign_summary(self, campaign_id: str) -> dict[str, int]:

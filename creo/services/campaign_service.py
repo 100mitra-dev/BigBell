@@ -1,13 +1,17 @@
+import logging
 from typing import Optional
 
 from creo.storage.base import get_campaign_repo
 from creo.models import Campaign
+
+logger = logging.getLogger(__name__)
 
 
 class CampaignService:
     def __init__(self):
         self._campaigns: list[Campaign] = []
         self.repo = get_campaign_repo()
+        logger.debug("CampaignService initialized")
 
     @property
     def campaigns(self) -> list[Campaign]:
@@ -27,10 +31,12 @@ class CampaignService:
     def add(self, campaign: Campaign):
         self.repo.add(campaign)
         self.refresh()
+        logger.info("Added campaign %s (%s)", campaign.id, campaign.title)
 
     def delete(self, campaign_id: str):
         self.repo.delete(campaign_id)
         self.refresh()
+        logger.info("Deleted campaign %s", campaign_id)
 
     def search(self, query: str = "") -> list[Campaign]:
         if not query:

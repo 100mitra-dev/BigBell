@@ -1,43 +1,47 @@
-import random
+import logging
 
 from creo.agents.base import BaseAgent
 from creo.models import Creator, Campaign
+
+logger = logging.getLogger(__name__)
 
 
 class MatchingAgent(BaseAgent):
     def match(self, creator: Creator, campaign: Campaign) -> dict:
         if self.use_mock:
             return self._mock_match(creator, campaign)
+        logger.debug("AI matching creator %s with campaign %s", creator.id, campaign.id)
         return self._ai_match(creator, campaign)
 
     def _mock_match(self, creator: Creator, campaign: Campaign) -> dict:
         niche_overlap = 0
         if creator.primary_niche.lower() in [n.lower() for n in campaign.target_niches]:
-            niche_overlap = 9 + random.uniform(0, 1)
+            niche_overlap = 9.5
         elif any(n.lower() in [t.lower() for t in campaign.target_niches] for n in creator.secondary_niches):
-            niche_overlap = 6 + random.uniform(0, 2)
+            niche_overlap = 7.0
         else:
             for target_niche in campaign.target_niches:
                 if any(charmap.lower() in target_niche.lower() for charmap in [creator.primary_niche] + creator.secondary_niches):
-                    niche_overlap = 4 + random.uniform(0, 2)
+                    niche_overlap = 5.0
                     break
             else:
-                niche_overlap = random.uniform(1, 3)
+                niche_overlap = 2.0
 
         language_overlap = 0
         if creator.primary_language in campaign.target_languages:
-            language_overlap = 9 + random.uniform(0, 1)
+            language_overlap = 9.5
         elif any(l in campaign.target_languages for l in creator.secondary_languages):
-            language_overlap = 6 + random.uniform(0, 2)
+            language_overlap = 7.0
         else:
-            language_overlap = random.uniform(1, 3)
+            language_overlap = 2.0
 
-        reach_score = min(10, (creator.total_followers / 100000) * 0.5 + random.uniform(0, 2))
-        engagement_score = min(10, creator.avg_engagement_rate * 1.5 + random.uniform(-0.5, 0.5))
-        quality_score = min(10, creator.content_quality_score + random.uniform(-0.5, 0.5))
-        completeness_score = min(10, creator.profile_completeness / 10 + random.uniform(-0.5, 0.5))
+        reach_score = min(10, (creator.total_followers / 100000) * 0.5)
+        engagement_score = min(10, creator.avg_engagement_rate * 1.5)
+        quality_score = min(10, creator.content_quality_score)
+        completeness_score = min(10, creator.profile_completeness / 10)
 
-        budget_fit = min(10, (campaign.budget / max(creator.total_earnings / max(creator.total_campaigns_completed, 1), 1)) * 2 + random.uniform(0, 2)) if creator.total_campaigns_completed > 0 else 5
+        avg_earning_per_campaign = max(creator.total_earnings / max(creator.total_campaigns_completed, 1), 1)
+        budget_fit = min(10, (campaign.budget / avg_earning_per_campaign) * 2) if creator.total_campaigns_completed > 0 else 5.0
 
         overall = (
             niche_overlap * 0.30
@@ -112,5 +116,6 @@ Return ONLY valid JSON, no markdown formatting."""
         try:
             import json
             return json.loads(result.strip().removeprefix("```json").removesuffix("```").strip())
-        except Exception:
+        except Exception as e:
+            logger.error("AI matching failed, falling back to mock: %s", e)
             return self._mock_match(creator, campaign)

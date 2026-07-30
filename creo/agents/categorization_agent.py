@@ -1,33 +1,36 @@
-import random
+import logging
 
 from creo.agents.base import BaseAgent
 from creo.models import Creator
 from creo.config import get_all_niches, LANGUAGES
+
+logger = logging.getLogger(__name__)
 
 
 class CategorizationAgent(BaseAgent):
     def categorize(self, creator: Creator) -> dict:
         if self.use_mock:
             return self._mock_categorize(creator)
+        logger.debug("AI categorizing creator %s", creator.id)
         return self._ai_categorize(creator)
 
     def _mock_categorize(self, creator: Creator) -> dict:
         primary_niche = creator.primary_niche
-        niche_scores = {niche: random.uniform(0, 5) for niche in get_all_niches()}
-        niche_scores[primary_niche] = random.uniform(8, 10)
+        niche_scores = {niche: 2.5 for niche in get_all_niches()}
+        niche_scores[primary_niche] = 9.0
 
         for secondary in creator.secondary_niches:
             if secondary in niche_scores:
-                niche_scores[secondary] = random.uniform(6, 8.5)
+                niche_scores[secondary] = 7.5
 
         niche_scores = dict(sorted(niche_scores.items(), key=lambda x: -x[1])[:5])
 
         primary_lang = creator.primary_language
-        lang_scores = {lang: random.uniform(0, 3) for lang in LANGUAGES}
+        lang_scores = {lang: 1.5 for lang in LANGUAGES}
         lang_scores[primary_lang] = 10.0
         for sec_lang in creator.secondary_languages:
             if sec_lang in lang_scores:
-                lang_scores[sec_lang] = random.uniform(6, 9)
+                lang_scores[sec_lang] = 7.5
         lang_scores = dict(sorted(lang_scores.items(), key=lambda x: -x[1])[:5])
 
         tier = creator.tier
@@ -77,5 +80,6 @@ Return ONLY valid JSON, no markdown formatting."""
         try:
             import json
             return json.loads(result.strip().removeprefix("```json").removesuffix("```").strip())
-        except Exception:
+        except Exception as e:
+            logger.error("AI categorization failed, falling back to mock: %s", e)
             return self._mock_categorize(creator)

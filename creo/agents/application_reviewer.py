@@ -1,36 +1,38 @@
-import random
-from datetime import date
+import logging
 
 from creo.agents.base import BaseAgent
 from creo.models import Creator, Campaign
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationReviewerAgent(BaseAgent):
     def review(self, creator: Creator, campaign: Campaign) -> dict:
         if self.use_mock:
             return self._mock_review(creator, campaign)
+        logger.debug("AI reviewing creator %s for campaign %s", creator.id, campaign.id)
         return self._ai_review(creator, campaign)
 
     def _mock_review(self, creator: Creator, campaign: Campaign) -> dict:
         niche_score = 0
         if creator.primary_niche.lower() in [n.lower() for n in campaign.target_niches]:
-            niche_score = 8 + random.uniform(0, 2)
+            niche_score = 9.0
         elif any(n.lower() in [t.lower() for t in campaign.target_niches] for n in creator.secondary_niches):
-            niche_score = 5 + random.uniform(0, 2)
+            niche_score = 6.0
         else:
-            niche_score = random.uniform(1, 4)
+            niche_score = 2.5
 
-        quality_score = min(10, creator.content_quality_score + random.uniform(-0.5, 0.5))
-        engagement_score = min(10, creator.avg_engagement_rate * 2 + random.uniform(-1, 1))
+        quality_score = min(10, creator.content_quality_score)
+        engagement_score = min(10, creator.avg_engagement_rate * 2)
         completeness_score = creator.profile_completeness / 10
 
         language_match = 0
         if creator.primary_language in campaign.target_languages:
-            language_match = 8 + random.uniform(0, 2)
+            language_match = 9.0
         elif any(l in campaign.target_languages for l in creator.secondary_languages):
-            language_match = 5 + random.uniform(0, 2)
+            language_match = 6.0
         else:
-            language_match = random.uniform(1, 3)
+            language_match = 2.0
 
         overall = (niche_score * 0.35 + quality_score * 0.25 + engagement_score * 0.2 + completeness_score * 0.1 + language_match * 0.1)
 
@@ -121,5 +123,6 @@ Return ONLY valid JSON, no markdown formatting."""
                 "feedback": parsed.get("feedback", ""),
                 "recommendation": parsed.get("recommendation", "shortlist"),
             }
-        except Exception:
+        except Exception as e:
+            logger.error("AI review failed, falling back to mock: %s", e)
             return self._mock_review(creator, campaign)
