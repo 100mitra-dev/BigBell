@@ -628,5 +628,15 @@
     "assigned_at": "2026-07-29",
     "updated_at": "2026-07-29",
     "notes": null
+  },
+  {
+    "id": "692418f6-deef-4fcd-9641-4e044e09ec64",
+    "campaign_id": "CAM-001",
+    "creator_id": "CRE-027",
+    "status": "paid",
+    "score": 5.0,
+    "assigned_at": "2026-07-30",
+    "updated_at": "2026-07-30",
+    "notes": null
   }
 ]
