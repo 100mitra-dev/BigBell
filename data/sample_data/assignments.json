@@ -80,46 +80,6 @@
     "notes": null
   },
   {
-    "id": "ef2d2363-167d-4150-8ceb-091b463af953",
-    "campaign_id": "CAM-003",
-    "creator_id": "CRE-004",
-    "status": "matched",
-    "score": 0.0,
-    "assigned_at": "2026-07-29",
-    "updated_at": "2026-07-29",
-    "notes": null
-  },
-  {
-    "id": "00357dea-cce1-4b74-8f46-b7c5fab0d771",
-    "campaign_id": "CAM-003",
-    "creator_id": "CRE-020",
-    "status": "matched",
-    "score": 0.0,
-    "assigned_at": "2026-07-29",
-    "updated_at": "2026-07-29",
-    "notes": null
-  },
-  {
-    "id": "d7874659-410c-4529-acb4-bda5e0106812",
-    "campaign_id": "CAM-003",
-    "creator_id": "CRE-029",
-    "status": "matched",
-    "score": 0.0,
-    "assigned_at": "2026-07-29",
-    "updated_at": "2026-07-29",
-    "notes": null
-  },
-  {
-    "id": "bf70550b-4844-4f63-9a14-c73386e41382",
-    "campaign_id": "CAM-003",
-    "creator_id": "CRE-044",
-    "status": "matched",
-    "score": 0.0,
-    "assigned_at": "2026-07-29",
-    "updated_at": "2026-07-29",
-    "notes": null
-  },
-  {
     "id": "5461fc2d-9559-4fe8-90b0-daf384f49dc8",
     "campaign_id": "CAM-004",
     "creator_id": "CRE-006",

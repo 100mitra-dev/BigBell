@@ -84,12 +84,7 @@
     ],
     "status": "active",
     "created_at": "2026-07-05",
-    "assigned_creators": [
-      "CRE-004",
-      "CRE-020",
-      "CRE-029",
-      "CRE-044"
-    ]
+    "assigned_creators": []
   },
   {
     "id": "CAM-004",

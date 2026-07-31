@@ -104,7 +104,9 @@ try:
         st.metric("Applications to review", apps_needing_review, help="Applications not yet accepted or rejected.")
         st.page_link(REVIEW_PAGE, label="Review applications", icon=":material/rate_review:", width="content")
     with att_cols[1]:
-        st.metric("Creators awaiting verification", status_counts.get("pending", 0), help="New sign-ups waiting for AI verification.")
+        accepted_app_ids = {a.creator_id for a in applications if a.status == "accepted"}
+        awaiting_verify = sum(1 for c in creators if c.id in accepted_app_ids and not c.verified)
+        st.metric("Creators awaiting verification", awaiting_verify, help="Accepted creators waiting for AI verification.")
         st.page_link(REVIEW_PAGE, label="Verify creators", icon=":material/verified:", width="content")
     with att_cols[2]:
         st.metric("Deadlines in next 14 days", upcoming_deadlines, help="Active campaigns ending soon.")

@@ -91,6 +91,8 @@ class Application(BaseModel):
     score: Optional[float] = None
     ai_notes: Optional[str] = None
     reviewer_notes: Optional[str] = None
+    source: str = "email"  # email | whatsapp
+    letter: Optional[str] = None
 
 
 class FAQ(BaseModel):

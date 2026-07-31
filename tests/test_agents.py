@@ -1,5 +1,10 @@
 import pytest
+from unittest import mock
+
+from creo.agents.base import BaseAgent
 from creo.agents.matching import MatchingAgent
+from creo.models import Application
+from creo.utils.mock_content import mock_recent_posts
 from creo.agents.categorization import CategorizationAgent
 from creo.agents.application_reviewer import ApplicationReviewerAgent
 from creo.agents.verification import VerificationAgent
@@ -222,3 +227,123 @@ class TestCreatorExtractionAgent:
         agent = CreatorExtractionAgent()
         text = "Hi, I'm Ravi Kumar. Gaming creator on YouTube @ravikumar, 1.2M subscribers."
         assert agent._mock_parse_text(text) == agent._mock_parse_text(text)
+
+
+class TestApplicationModelFields:
+    def test_application_defaults(self):
+        app = Application(id="APP-1", creator_id="CRE-1", campaign_id="CAM-1")
+        assert app.source == "email"
+        assert app.letter is None
+
+    def test_application_custom_source_and_letter(self):
+        app = Application(
+            id="APP-1",
+            creator_id="CRE-1",
+            campaign_id="CAM-1",
+            source="whatsapp",
+            letter="Hi team, would love to collaborate!",
+        )
+        assert app.source == "whatsapp"
+        assert "collaborate" in app.letter
+
+
+class TestMockRecentPosts:
+    def test_returns_five_deterministic_posts(self, sample_creator):
+        posts = mock_recent_posts(sample_creator)
+        assert len(posts) == 5
+        assert all("caption" in p and "likes" in p and "platform" in p for p in posts)
+        assert mock_recent_posts(sample_creator) == posts
+
+    def test_posts_use_creator_platforms(self, sample_creator):
+        platforms = {p["platform"] for p in mock_recent_posts(sample_creator)}
+        assert platforms.issubset(set(sample_creator.platforms.keys()))
+
+    def test_posts_scale_with_followers(self, sample_creator, minimal_creator):
+        big = mock_recent_posts(sample_creator)
+        small = mock_recent_posts(minimal_creator)
+        assert sum(p["likes"] for p in big) > sum(p["likes"] for p in small)
+
+    def test_falls_back_to_instagram_without_platforms(self, minimal_creator):
+        posts = mock_recent_posts(minimal_creator)
+        assert all(p["platform"] == "instagram" for p in posts)
+
+
+class TestBaseAgentTimeout:
+    def test_llm_timeout_constant_is_10_seconds(self):
+        assert BaseAgent.LLM_TIMEOUT_SECONDS == 10
+
+    def test_failure_still_logs_api_entry(self):
+        agent = BaseAgent()
+        captured = {}
+
+        def fake_add_log(entry):
+            captured.update(entry.__dict__)
+
+        def fake_get_llm():
+            llm = mock.MagicMock()
+            llm.invoke.side_effect = RuntimeError("server exploded")
+            return llm
+
+        with mock.patch.object(agent, "_get_llm", fake_get_llm), mock.patch(
+            "creo.agents.base.add_log", fake_add_log
+        ):
+            result = agent._run_llm_chain("test prompt")
+
+        assert result is None
+        assert captured["success"] is False
+        assert captured["error"] == "server exploded"
+        assert captured["duration_ms"] >= 0
+        assert captured["request_preview"] == "test prompt"
+
+    def test_timeout_error_is_labeled(self):
+        agent = BaseAgent()
+        captured = {}
+
+        def fake_add_log(entry):
+            captured.update(entry.__dict__)
+
+        def fake_get_llm():
+            llm = mock.MagicMock()
+            llm.invoke.side_effect = TimeoutError("Request timed out after 20 seconds")
+            return llm
+
+        with mock.patch.object(agent, "_get_llm", fake_get_llm), mock.patch(
+            "creo.agents.base.add_log", fake_add_log
+        ):
+            result = agent._run_llm_chain("test prompt")
+
+        assert result is None
+        assert captured["success"] is False
+        assert captured["error"].startswith("TIMEOUT (>10s)")
+
+    def test_stream_failure_logs_entry(self):
+        agent = BaseAgent()
+
+        def fake_get_llm():
+            llm = mock.MagicMock()
+            llm.stream.side_effect = RuntimeError("stream failed")
+            return llm
+
+        with mock.patch.object(agent, "_get_llm", fake_get_llm), mock.patch(
+            "creo.agents.base.add_log"
+        ) as fake_add_log:
+            chunks = list(agent._stream_llm("test prompt"))
+
+        assert any("stream failed" in c for c in chunks)
+        entry = fake_add_log.call_args[0][0]
+        assert entry.success is False
+        assert entry.error == "stream failed"
+
+    def test_get_llm_forwards_timeout(self):
+        with mock.patch("creo.agents.base.get_provider", return_value="openai"), mock.patch(
+            "creo.agents.base.get_openai_key", return_value="sk-test"
+        ), mock.patch("creo.agents.base.get_openai_model", return_value="gpt-4o-mini"):
+            llm = BaseAgent()._get_llm()
+        assert llm.request_timeout == 10
+        assert llm.max_retries == 1
+
+        with mock.patch("creo.agents.base.get_provider", return_value="gemini"), mock.patch(
+            "creo.agents.base.get_gemini_key", return_value="AIza-test"
+        ), mock.patch("creo.agents.base.get_gemini_model", return_value="gemini-2.0-flash"):
+            llm = BaseAgent()._get_llm()
+        assert llm.timeout == 10

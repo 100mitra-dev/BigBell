@@ -11,9 +11,10 @@ from creo.models import CreatorStatus
 from creo.services.campaign_service import CampaignService
 from creo.services.creator_service import CreatorService
 from creo.ui.components.cards import creator_avatar
-from creo.ui.components.platforms import platform_link_markdown, render_platform_grid
+from creo.ui.components.platforms import platform_icon, platform_link_markdown, render_platform_grid
 from creo.utils.dates import today_str
 from creo.utils.json_io import load_applications, save_applications
+from creo.utils.mock_content import mock_recent_posts
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,8 @@ APP_STATUS_COLORS = {
 
 def pipeline_badges(creator, apps) -> str:
     has_pending = any(a.status == "pending" for a in apps if a.creator_id == creator.id)
-    needs_verify = creator.status in (CreatorStatus.PENDING, CreatorStatus.ONBOARDING) and not creator.verified
+    has_accepted = any(a.status == "accepted" for a in apps if a.creator_id == creator.id)
+    needs_verify = has_accepted and not creator.verified
     needs_classify = not creator.classified_at
     badges = []
     if has_pending:
@@ -80,11 +82,9 @@ try:
 
     with st.container(horizontal=True):
         st.metric("Pending reviews", len([a for a in apps if a.status == "pending"]), border=True)
-        st.metric(
-            "Awaiting verification",
-            len(cs.filter_by_status("pending") + cs.filter_by_status("onboarding")),
-            border=True,
-        )
+        accepted_app_creator_ids = {a.creator_id for a in apps if a.status == "accepted"}
+        awaiting_verify = [c for c in cs.creators if c.id in accepted_app_creator_ids and not c.verified]
+        st.metric("Awaiting verification", len(awaiting_verify), border=True)
         st.metric("Awaiting classification", len([c for c in cs.creators if not c.classified_at]), border=True)
         st.metric("Active creators", cs.get_active_count(), border=True)
 
@@ -112,13 +112,11 @@ try:
 
         pool = cs.search(sq) if sq else cs.creators
         pending_app_creator_ids = {a.creator_id for a in apps if a.status == "pending"}
+        accepted_app_creator_ids = {a.creator_id for a in apps if a.status == "accepted"}
         if stage == "review":
             pool = [c for c in pool if c.id in pending_app_creator_ids]
         elif stage == "verify":
-            pool = [
-                c for c in pool
-                if c.status in (CreatorStatus.PENDING, CreatorStatus.ONBOARDING) and not c.verified
-            ]
+            pool = [c for c in pool if c.id in accepted_app_creator_ids and not c.verified]
         elif stage == "classify":
             pool = [c for c in pool if not c.classified_at]
 
@@ -183,9 +181,10 @@ try:
                     st.caption(
                         f":material/group: {creator.total_followers:,} followers  \u00b7  "
                         f":material/trending_up: {creator.avg_engagement_rate}% engagement  \u00b7  "
-                        f":material/workspace_premium: {creator.tier}"
+                        f":material/workspace_premium: {creator.tier}",
+                        help="Followers: total across linked platforms. Engagement: avg likes + comments per follower "
+                        "on recent posts (1-3% typical, 5%+ strong). Tier: target tier, e.g. nano, micro, mid, macro.",
                     )
-
     # ═══════════════════════════════════════════════
     # DETAIL PANEL
     # ═══════════════════════════════════════════════
@@ -213,10 +212,30 @@ try:
                     f":material/category: {'Classified' if creator.classified_at else 'Not classified'}"
                 )
             sc = st.columns(4)
-            sc[0].metric("Followers", f"{creator.total_followers:,}", border=True)
-            sc[1].metric("Engagement", f"{creator.avg_engagement_rate}%", border=True)
-            sc[2].metric("Content quality", f"{creator.content_quality_score}/10", border=True)
-            sc[3].metric("Profile completeness", f"{creator.profile_completeness}%", border=True)
+            sc[0].metric(
+                "Followers",
+                f"{creator.total_followers:,}",
+                border=True,
+                help="Combined audience across all linked social platforms.",
+            )
+            sc[1].metric(
+                "Engagement",
+                f"{creator.avg_engagement_rate}%",
+                border=True,
+                help="Average likes + comments per follower on recent posts. 1-3% is typical; 5%+ is strong.",
+            )
+            sc[2].metric(
+                "Content quality",
+                f"{creator.content_quality_score}/10",
+                border=True,
+                help="AI-assessed score for content consistency, originality and production quality.",
+            )
+            sc[3].metric(
+                "Profile completeness",
+                f"{creator.profile_completeness}%",
+                border=True,
+                help="How complete the creator's profile data is. Below 80% is flagged during verification.",
+            )
             if creator.suggested_tags:
                 st.markdown(" ".join(f":material/sell: `{t}`" for t in creator.suggested_tags))
 
@@ -245,24 +264,69 @@ try:
                 st.caption("No applications from this creator yet.")
             for app in creator_apps:
                 campaign = cams.get_by_id(app.campaign_id)
-                camp_label = f"{campaign.title} \u00b7 {campaign.brand}" if campaign else "Unknown campaign"
                 rk = f"rr_{app.id}"
 
                 with st.container(border=True):
-                    a1, a2 = st.columns([3, 1], vertical_alignment="center")
-                    with a1:
-                        st.markdown(f"**{camp_label}**")
-                        st.caption(f"Applied {app.applied_at}" + (f" \u00b7 Score {app.score}/10" if app.score else ""))
-                    with a2:
-                        st.badge(app.status, color=APP_STATUS_COLORS.get(app.status, "gray"))
+                    source_icon = ":material/chat:" if app.source == "whatsapp" else ":material/mail:"
+                    source_label = "WhatsApp" if app.source == "whatsapp" else "Email"
+                    st.markdown(
+                        f"{source_icon} **{source_label} application**  \u00b7  "
+                        f"Applied {app.applied_at}" + (f" \u00b7 Score {app.score}/10" if app.score else "")
+                    )
 
-                    if campaign:
+                    if app.letter:
+                        with st.expander("Application letter", expanded=True, icon=":material/notes:"):
+                            st.markdown(app.letter)
+
+                    stats = st.columns(4)
+                    stats[0].metric("Followers", f"{creator.total_followers:,}", border=True)
+                    stats[1].metric(
+                        "Engagement",
+                        f"{creator.avg_engagement_rate}%",
+                        border=True,
+                        help="Average likes + comments per follower on recent posts. 1-3% is typical; 5%+ is strong.",
+                    )
+                    stats[2].metric(
+                        "Content quality",
+                        f"{creator.content_quality_score}/10",
+                        border=True,
+                        help="AI-assessed score for content consistency, originality and production quality.",
+                    )
+                    stats[3].metric(
+                        "Profile completeness",
+                        f"{creator.profile_completeness}%",
+                        border=True,
+                        help="How complete the creator's profile data is. Below 80% is flagged during verification.",
+                    )
+
+                    if creator.platforms:
+                        st.markdown("**:material/account_circle: Handles**")
+                        render_platform_grid(creator.platforms)
+
+                    posts = mock_recent_posts(creator)
+                    with st.expander("Recent posts", icon=":material/image:"):
+                        for p in posts:
+                            st.markdown(
+                                f"{platform_icon(p['platform'])} **{p['platform'].title()}** \u00b7 "
+                                f"{p['posted_at']}  \u00b7  :material/thumb_up: {p['likes']:,} likes  \u00b7  "
+                                f":material/comment: {p['comments']:,} comments"
+                            )
+                            st.markdown(p["caption"])
+                            st.divider()
+
+                    status_color = APP_STATUS_COLORS.get(app.status, "gray")
+                    if app.status == "pending":
+                        st.badge("Pending review", icon=":material/schedule:", color=status_color)
+                    else:
+                        st.badge(app.status, color=status_color)
+
+                    col_ai, col_acc, col_rej = st.columns(3, gap="small")
+                    with col_ai:
                         if app.status == "pending":
                             review_clicked = st.button(
                                 "Run AI review",
                                 key=f"b_{app.id}",
                                 icon=":material/rate_review:",
-                                type="primary",
                                 width="stretch",
                             )
                         else:
@@ -272,23 +336,56 @@ try:
                                 icon=":material/refresh:",
                                 width="stretch",
                             )
-                        if review_clicked:
-                            with st.spinner(f"Reviewing {creator.name} for {campaign.title}..."):
+                    with col_acc:
+                        accept_clicked = st.button(
+                            "Accept",
+                            key=f"acc_{app.id}",
+                            icon=":material/check_circle:",
+                            type="primary",
+                            width="stretch",
+                            disabled=app.status == "accepted",
+                        )
+                    with col_rej:
+                        reject_clicked = st.button(
+                            "Reject",
+                            key=f"rej_{app.id}",
+                            icon=":material/block:",
+                            width="stretch",
+                            disabled=app.status == "rejected",
+                        )
+
+                    if accept_clicked:
+                        app.status = "accepted"
+                        app.reviewed_at = today_str()
+                        save_applications(apps)
+                        st.success(f"Application {app.id} accepted")
+                        st.rerun()
+
+                    if reject_clicked:
+                        app.status = "rejected"
+                        app.reviewed_at = today_str()
+                        save_applications(apps)
+                        st.error(f"Application {app.id} rejected")
+                        st.rerun()
+
+                    if review_clicked:
+                        if campaign is None:
+                            st.warning("Campaign record unavailable \u2014 AI review skipped.")
+                        else:
+                            with st.spinner(f"Reviewing {creator.name}..."):
                                 r = reviewer.review(creator, campaign)
                                 app.score = r["score"]
                                 app.ai_notes = r["feedback"]
                                 app.reviewed_at = today_str()
                                 if r.get("recommendation") == "accept":
-                                    app.status = "shortlisted"
+                                    app.status = "accepted"
                                 elif r.get("recommendation") == "reject":
                                     app.status = "rejected"
                                 else:
-                                    app.status = "reviewed"
+                                    app.status = "shortlisted"
                                 save_applications(apps)
                                 st.session_state[rk] = r
                             st.rerun()
-                    else:
-                        st.caption("Campaign record unavailable \u2014 manual review not possible.")
 
                     result = st.session_state.get(rk)
                     if result:
@@ -302,10 +399,26 @@ try:
                             st.error(f":material/block: **Reject** \u2014 {msg}")
 
                         sc = st.columns(4)
-                        sc[0].metric("Niche alignment", f'{result.get("niche_alignment", "N/A")}/10')
-                        sc[1].metric("Quality", f'{result.get("quality_score", "N/A")}/10')
-                        sc[2].metric("Engagement", f'{result.get("engagement_score", "N/A")}/10')
-                        sc[3].metric("Language", f'{result.get("language_match", "N/A")}/10')
+                        sc[0].metric(
+                            "Niche alignment",
+                            f'{result.get("niche_alignment", "N/A")}/10',
+                            help="How well the creator's niche matches the campaign's target audience.",
+                        )
+                        sc[1].metric(
+                            "Quality",
+                            f'{result.get("quality_score", "N/A")}/10',
+                            help="AI-assessed content quality for this creator.",
+                        )
+                        sc[2].metric(
+                            "Engagement",
+                            f'{result.get("engagement_score", "N/A")}/10',
+                            help="AI-assessed audience engagement strength.",
+                        )
+                        sc[3].metric(
+                            "Language",
+                            f'{result.get("language_match", "N/A")}/10',
+                            help="How well the creator's language matches the campaign's audience.",
+                        )
 
                         if result.get("risks"):
                             with st.expander("Risks", icon=":material/warning:"):
