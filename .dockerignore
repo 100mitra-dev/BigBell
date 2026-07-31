@@ -1,0 +1,31 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Runtime data (rebuilt/persisted via the /app/data volume)
+data/vector_store/
+data/sample_data/chat_history.json
+data/sample_data/faq_uploaded.json
+*.db
+
+# Secrets — pass via env / --env-file, never bake into the image
+.env
+.streamlit/secrets.toml
+
+# Dev / docs
+tests/
+.agents/
+.idea/
+.vscode/
+*.md

@@ -48,7 +48,7 @@ class BaseAgent:
         try:
             response = llm.invoke(prompt)
             result = response.content if hasattr(response, "content") else str(response)
-            entry.response_preview = result[:500]
+            entry.response_preview = result[:2000]
             entry.success = True
             return result
         except Exception as e:
@@ -78,7 +78,7 @@ class BaseAgent:
                 content = chunk.content if hasattr(chunk, "content") else str(chunk)
                 chunks.append(content)
                 yield content
-            entry.response_preview = "".join(chunks)[:500]
+            entry.response_preview = "".join(chunks)[:2000]
             entry.success = True
         except Exception as e:
             logger.error("LLM streaming failed: %s", e)

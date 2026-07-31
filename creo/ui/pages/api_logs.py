@@ -1,4 +1,25 @@
+import json
+
 import streamlit as st
+
+
+def format_preview(text: str) -> tuple[str, str]:
+    """Pretty-print a response if it is a JSON blob (optionally fenced)."""
+    if not text:
+        return "", ""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+    try:
+        return json.dumps(json.loads(cleaned), indent=2, ensure_ascii=False), "json"
+    except (json.JSONDecodeError, ValueError, TypeError):
+        return text, ""
+
 
 st.title("API Debug Logs")
 st.caption("Detailed logs of LLM API calls")
@@ -10,7 +31,7 @@ if not logs:
 else:
     c1, c2 = st.columns([6, 1])
     with c2:
-        if st.button("Clear all", icon=":material/delete_sweep:", type="primary", use_container_width=True):
+        if st.button("Clear all", icon=":material/delete_sweep:", type="primary", width="stretch"):
             from creo.debug_logger import clear_logs
             clear_logs()
             st.rerun()
@@ -38,7 +59,8 @@ else:
                 with req_tab:
                     st.code(log.get("request_preview", ""), wrap_lines=True)
                 with res_tab:
-                    st.code(log.get("response_preview", ""), wrap_lines=True)
+                    pretty, lang = format_preview(log.get("response_preview", ""))
+                    st.code(pretty, language=lang or None, wrap_lines=True)
                 with err_tab:
                     err = log.get("error")
                     if err:

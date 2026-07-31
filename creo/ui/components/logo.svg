@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 60" width="250" height="60">
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#7C3AED"/>
       <stop offset="100%" stop-color="#A78BFA"/>
     </linearGradient>
   </defs>
-  <text x="50%" y="68%" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="800" fill="url(#g)" text-anchor="middle" dominant-baseline="middle" letter-spacing="-0.8">creo</text>
+  <text x="50%" y="68%" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="800" fill="url(#g)" text-anchor="middle" dominant-baseline="middle" letter-spacing="-0.8">🚀 creo</text>
 </svg>
