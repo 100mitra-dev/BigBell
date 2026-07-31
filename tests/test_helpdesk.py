@@ -123,3 +123,45 @@ class TestHelpdeskService:
         assert stats["threads"] == 1
         assert stats["auto"] == 1
         assert stats["pending"] == 1
+
+    def test_multiple_creators_get_independent_threads(self, tmp_path):
+        svc = self._make_service(tmp_path)
+        svc.receive_question("creator-a", "How do I apply for a campaign?", "whatsapp")
+        svc.receive_question("creator-b", "What is the meaning of life?", "email")
+        assert svc.creator_ids() == ["creator-a", "creator-b"]
+        assert len(svc.thread("creator-a")) == 2
+        assert len(svc.thread("creator-b")) == 1
+        assert svc.pending_count("creator-a") == 0
+        assert svc.pending_count("creator-b") == 1
+
+    def test_reply_only_touches_its_creator_thread(self, tmp_path):
+        svc = self._make_service(tmp_path)
+        svc.receive_question("creator-a", "What is the meaning of life?", "whatsapp")
+        svc.receive_question("creator-b", "When does the new season start?", "whatsapp")
+        svc.send_reply("creator-a", "Let me check with the team.")
+        assert svc.pending_count("creator-a") == 0
+        assert svc.pending_count("creator-b") == 1
+        thread_a = svc.thread("creator-a")
+        thread_b = svc.thread("creator-b")
+        assert thread_a[-1].role == "agent"
+        assert all(m.role == "creator" for m in thread_b)
+
+    def test_create_mock_creator_makes_distinct_creators(self, tmp_path, monkeypatch):
+        created = []
+
+        class FakeCreatorService:
+            def __init__(self):
+                self.creators = created
+
+            def add(self, creator):
+                created.append(creator)
+
+        monkeypatch.setattr(
+            "creo.services.creator_service.CreatorService",
+            FakeCreatorService,
+        )
+        svc = self._make_service(tmp_path)
+        c1 = svc.create_mock_creator("Alice", "alice@example.com", "+911", "Gaming", "English")
+        c2 = svc.create_mock_creator("Bob", "bob@example.com", "+912", "Fashion", "English")
+        assert c1.id != c2.id
+        assert len(created) == 2

@@ -64,13 +64,20 @@ def get_suggestions(pending_msg) -> list[str]:
 
 def current_thread_id() -> str | None:
     selected = st.session_state.get("selected_thread")
-    if selected and cs.get_by_id(selected):
+    if selected and (cs.get_by_id(selected) or selected in svc.creator_ids()):
         return selected
+    picked = st.session_state.get("thread_picker")
+    if picked and (cs.get_by_id(picked) or picked in svc.creator_ids()):
+        return picked
     thread_ids = svc.creator_ids()
     if thread_ids:
         return thread_ids[0]
     creators = cs.creators
     return creators[0].id if creators else None
+
+
+def on_thread_picked():
+    st.session_state.selected_thread = st.session_state.thread_picker
 
 
 st.title("Creator Helpdesk")
@@ -108,7 +115,9 @@ with inbox_tab:
                     language = st.selectbox("Primary language", LANGUAGES)
                     if st.form_submit_button("Create & open thread", type="primary", use_container_width=True) and name:
                         creator = svc.create_mock_creator(name, email, phone, niche, language)
+                        cs.refresh()
                         st.session_state.selected_thread = creator.id
+                        st.session_state.thread_picker = creator.id
                         st.success(f"Created mock creator **{creator.name}**")
                         st.rerun()
 
@@ -133,22 +142,22 @@ with inbox_tab:
         with st.container(border=True):
             st.markdown("**Threads**")
             if thread_ids:
-                labels = {creator_label(cid): cid for cid in thread_ids}
-                default_label = None
-                selected = st.session_state.get("selected_thread")
-                if selected and selected in labels.values():
-                    default_label = next(l for l, cid in labels.items() if cid == selected)
-                chosen = st.selectbox(
+                active = current_thread_id()
+                options = list(thread_ids)
+                if active and active not in options:
+                    options.insert(0, active)
+                chosen_id = st.selectbox(
                     "Select creator",
-                    options=list(labels.keys()),
-                    index=list(labels.keys()).index(default_label) if default_label else 0,
+                    options=options,
+                    index=options.index(active) if active in options else 0,
                     key="thread_picker",
+                    format_func=creator_label,
+                    on_change=on_thread_picked,
                     label_visibility="collapsed",
                 )
-                selected_thread = labels[chosen]
-                st.session_state.selected_thread = selected_thread
-                st.caption(f"Unanswered: {svc.pending_count(selected_thread)} \u00b7 "
-                           f"{len(svc.thread(selected_thread))} messages")
+                st.session_state.selected_thread = chosen_id
+                st.caption(f"Unanswered: {svc.pending_count(chosen_id)} \u00b7 "
+                           f"{len(svc.thread(chosen_id))} messages")
             elif cs.creators:
                 st.caption("No conversations yet \u2014 send a question with the demo tool to start one.")
             else:
