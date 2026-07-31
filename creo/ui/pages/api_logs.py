@@ -36,12 +36,12 @@ else:
             with st.expander("Request / Response", icon=":material/code:"):
                 req_tab, res_tab, err_tab = st.tabs(["Request", "Response", "Error"])
                 with req_tab:
-                    st.code(log.get("request_preview", ""), line_wrap=True)
+                    st.code(log.get("request_preview", ""), wrap_lines=True)
                 with res_tab:
-                    st.code(log.get("response_preview", ""), line_wrap=True)
+                    st.code(log.get("response_preview", ""), wrap_lines=True)
                 with err_tab:
                     err = log.get("error")
                     if err:
-                        st.code(err, line_wrap=True)
+                        st.code(err, wrap_lines=True)
                     else:
                         st.caption("No error")

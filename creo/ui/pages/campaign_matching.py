@@ -225,7 +225,8 @@ try:
                     pool = [c for c in pool if c.total_followers >= f_min]
 
                 with st.container(border=True):
-                    run_match = st.button("Run AI matching", type="primary", icon=":material/target:", use_container_width=True)
+                    run_match = st.button("Run smart matching", type="primary", icon=":material/target:", use_container_width=True)
+                    st.caption("Local scoring \u2014 heuristic rules + embedding similarity. No API calls, instant results.")
                     unassigned_pool = [c for c in pool if not asvc.is_assigned(campaign.id, c.id)]
                     st.markdown("**Or assign manually**")
                     if unassigned_pool:
@@ -248,7 +249,7 @@ try:
                         st.caption("All visible creators are already assigned to this campaign.")
 
                 if run_match:
-                    with st.spinner("Running AI matching..."):
+                    with st.spinner("Scoring all creators (local embeddings)..."):
                         all_matches = []
                         for creator in pool:
                             all_matches.append({"creator": creator, "match": matcher.match(creator, campaign)})

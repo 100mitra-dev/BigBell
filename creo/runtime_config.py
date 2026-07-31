@@ -9,7 +9,7 @@ _RUNTIME_CONFIG = {
     "openai_key": OPENAI_API_KEY,
     "gemini_key": GEMINI_API_KEY,
     "openai_model": "gpt-4o",
-    "gemini_model": "gemini-1.5-pro",
+    "gemini_model": "gemini-3.5-flash-lite",
     "youtube_key": "",
     "instagram_key": "",
     "whatsapp_key": "",
@@ -108,7 +108,7 @@ def set_openai_model(model: str):
 
 
 def get_gemini_model() -> str:
-    return _RUNTIME_CONFIG.get("gemini_model", "gemini-1.5-pro")
+    return _RUNTIME_CONFIG.get("gemini_model", "gemini-3.5-flash-lite")
 
 
 def set_gemini_model(model: str):

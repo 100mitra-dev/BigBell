@@ -8,4 +8,6 @@ wheels/
 .streamlit/secrets.toml
 .env
 data/vector_store/
+data/sample_data/chat_history.json
+data/sample_data/faq_uploaded.json
 *.db

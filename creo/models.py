@@ -138,3 +138,15 @@ class FollowUpNote(BaseModel):
     campaign_id: str
     note: str
     created_at: str = ""
+
+
+class ChatMessage(BaseModel):
+    id: str
+    creator_id: str
+    role: str  # "creator" | "agent"
+    content: str
+    channel: str = "whatsapp"  # whatsapp | email | in_app
+    kind: str = "manual"  # incoming | auto | manual
+    faq_id: Optional[str] = None
+    confidence: Optional[str] = None
+    created_at: str = ""

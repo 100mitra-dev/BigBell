@@ -5,7 +5,7 @@ CONFIG_DEFAULTS = {
     "openai_key": "",
     "gemini_key": "",
     "openai_model": "gpt-4o",
-    "gemini_model": "gemini-1.5-pro",
+    "gemini_model": "gemini-3.5-flash-lite",
     "debug_logging": False,
 }
 

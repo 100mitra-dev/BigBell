@@ -109,6 +109,8 @@ Review this application and return a JSON with:
 
 Return ONLY valid JSON, no markdown formatting."""
         result = self._run_llm_chain(prompt)
+        if result is None:
+            return self._mock_review(creator, campaign)
         try:
             import json
             parsed = json.loads(result.strip().removeprefix("```json").removesuffix("```").strip())

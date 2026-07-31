@@ -77,6 +77,8 @@ Return a JSON with:
 
 Return ONLY valid JSON, no markdown formatting."""
         result = self._run_llm_chain(prompt)
+        if result is None:
+            return self._mock_categorize(creator)
         try:
             import json
             return json.loads(result.strip().removeprefix("```json").removesuffix("```").strip())

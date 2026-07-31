@@ -25,6 +25,19 @@ def _get_onnx():
     return _default_embeddings
 
 
+def get_local_embeddings() -> ONNXEmbeddings:
+    """Deterministic, local, CPU-only embeddings (no API key, no network)."""
+    return _get_onnx()
+
+
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    import math
+    denom = math.sqrt(sum(x * x for x in a)) * math.sqrt(sum(y * y for y in b))
+    if denom == 0:
+        return 0.0
+    return sum(x * y for x, y in zip(a, b)) / denom
+
+
 def get_embeddings():
     provider = get_provider()
     if provider == "openai":

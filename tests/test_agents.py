@@ -3,6 +3,7 @@ from creo.agents.matching_agent import MatchingAgent
 from creo.agents.categorization_agent import CategorizationAgent
 from creo.agents.application_reviewer import ApplicationReviewerAgent
 from creo.agents.verification_agent import VerificationAgent
+from creo.models import Creator, CreatorStatus
 
 
 class TestMatchingAgent:
@@ -32,6 +33,41 @@ class TestMatchingAgent:
         r1 = agent._mock_match(sample_creator, sample_campaign)
         r2 = agent._mock_match(sample_creator, sample_campaign)
         assert r1 == r2
+
+    def test_score_match_deterministic(self, sample_creator, sample_campaign):
+        agent = MatchingAgent()
+        r1 = agent.match(sample_creator, sample_campaign)
+        r2 = agent.match(sample_creator, sample_campaign)
+        assert r1 == r2
+
+    def test_score_match_exact_niche(self, sample_creator, sample_campaign):
+        result = MatchingAgent().match(sample_creator, sample_campaign)
+        assert result["niche_overlap"] == 9.5
+        assert result["language_overlap"] == 9.5
+        assert result["overall_score"] > 0
+
+    def test_score_match_no_overlap(self, minimal_creator, sample_campaign):
+        result = MatchingAgent().match(minimal_creator, sample_campaign)
+        assert result["niche_overlap"] == 2.0
+
+    def test_score_match_semantic_niche_boost(self, sample_campaign):
+        creator = Creator(
+            id="creator-sem",
+            name="Semantic Creator",
+            email="sem@example.com",
+            primary_niche="Fitness & Wellness",
+            secondary_niches=[],
+            primary_language="English",
+            platforms={},
+            content_quality_score=7.0,
+            profile_completeness=80.0,
+            avg_engagement_rate=3.0,
+            status=CreatorStatus.ACTIVE,
+        )
+        campaign = sample_campaign.model_copy(deep=True)
+        campaign.target_niches = ["Lifestyle & Health"]
+        result = MatchingAgent().match(creator, campaign)
+        assert result["niche_overlap"] >= 5.0
 
 
 class TestCategorizationAgent:
