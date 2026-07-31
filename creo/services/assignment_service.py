@@ -2,9 +2,10 @@ import logging
 from typing import Optional
 import uuid
 
-from creo.storage.base import get_assignment_repo
+from creo.storage.factories import get_assignment_repo
 from creo.models import CampaignAssignment, AssignmentStatus
-from creo.utils.helpers import today_str
+from creo.utils.dates import today_str
+from creo.services.base import CachedRepositoryService
 
 logger = logging.getLogger(__name__)
 
@@ -39,20 +40,17 @@ STATUS_LABELS: dict[AssignmentStatus, str] = {
 }
 
 
-class AssignmentService:
+class AssignmentService(CachedRepositoryService[CampaignAssignment]):
     def __init__(self):
-        self._assignments: list[CampaignAssignment] = []
-        self.repo = get_assignment_repo()
+        super().__init__()
         logger.debug("AssignmentService initialized")
+
+    def _make_repo(self):
+        return get_assignment_repo()
 
     @property
     def assignments(self) -> list[CampaignAssignment]:
-        if not self._assignments:
-            self._assignments = self.repo.list_all()
-        return self._assignments
-
-    def refresh(self):
-        self._assignments = self.repo.list_all()
+        return self.items
 
     def get_for_campaign(self, campaign_id: str) -> list[CampaignAssignment]:
         return [a for a in self.assignments if a.campaign_id == campaign_id]

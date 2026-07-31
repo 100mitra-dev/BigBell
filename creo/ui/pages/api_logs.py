@@ -3,8 +3,15 @@ import json
 import streamlit as st
 
 
-def format_preview(text: str) -> tuple[str, str]:
+def format_preview(text) -> tuple[str, str]:
     """Pretty-print a response if it is a JSON blob (optionally fenced)."""
+    if text is None:
+        return "", ""
+    if not isinstance(text, str):
+        try:
+            return json.dumps(text, indent=2, ensure_ascii=False), "json"
+        except (TypeError, ValueError):
+            return str(text), ""
     if not text:
         return "", ""
     cleaned = text.strip()
@@ -32,7 +39,7 @@ else:
     c1, c2 = st.columns([6, 1])
     with c2:
         if st.button("Clear all", icon=":material/delete_sweep:", type="primary", width="stretch"):
-            from creo.debug_logger import clear_logs
+            from creo.utils.debug_logging import clear_logs
             clear_logs()
             st.rerun()
 

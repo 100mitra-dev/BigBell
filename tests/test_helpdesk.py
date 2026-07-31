@@ -8,7 +8,7 @@ from creo.rag.faq_kb import (
     parse_faq_pdf,
 )
 from creo.services.helpdesk_service import HelpdeskService
-from creo.utils.helpers import load_faqs
+from creo.utils.json_io import load_faqs
 
 
 class TestFAQTextParsing:

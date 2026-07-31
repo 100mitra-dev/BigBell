@@ -8,7 +8,7 @@ from creo.models import Payment
 class WhatsAppPaymentRepository(PaymentRepository):
     @property
     def use_real_api(self) -> bool:
-        from creo.runtime_config import get_whatsapp_key
+        from creo.utils.runtime_settings import get_whatsapp_key
         return bool(get_whatsapp_key())
 
     def list_all(self) -> list[Payment]:

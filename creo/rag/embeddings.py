@@ -1,6 +1,6 @@
 from typing import Optional
 
-from creo.runtime_config import get_provider, get_openai_key, get_gemini_key
+from creo.utils.runtime_settings import get_provider, get_openai_key, get_gemini_key
 
 
 class ONNXEmbeddings:

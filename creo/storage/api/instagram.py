@@ -8,7 +8,7 @@ from creo.models import Campaign
 class InstagramCampaignRepository(CampaignRepository):
     @property
     def use_real_api(self) -> bool:
-        from creo.runtime_config import get_instagram_key
+        from creo.utils.runtime_settings import get_instagram_key
         return bool(get_instagram_key())
 
     def list_all(self) -> list[Campaign]:
@@ -32,7 +32,7 @@ class InstagramCampaignRepository(CampaignRepository):
         raise NotImplementedError("Instagram API repository is read-only")
 
     def _fetch_from_instagram(self) -> list[Campaign]:
-        from creo.runtime_config import get_instagram_key
+        from creo.utils.runtime_settings import get_instagram_key
         key = get_instagram_key()
         try:
             import requests

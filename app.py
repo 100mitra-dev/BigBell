@@ -48,18 +48,19 @@ page = st.navigation({
         st.Page("creo/ui/pages/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
     ],
     "Creators": [
-        st.Page("creo/ui/pages/creator_crm.py", title="All Creators", icon=":material/group:"),
+        st.Page("creo/ui/pages/creators.py", title="All Creators", icon=":material/group:"),
+        st.Page("creo/ui/pages/add_creator.py", title="Add Creator with AI", icon=":material/person_add:"),
         st.Page("creo/ui/pages/creator_validation.py", title="Review & Classify", icon=":material/verified:"),
     ],
     "Campaigns": [
-        st.Page("creo/ui/pages/campaign_matching.py", title="Match Creators", icon=":material/target:"),
-        st.Page("creo/ui/pages/follow_ups.py", title="Deadlines & Notes", icon=":material/calendar_clock:"),
+        st.Page("creo/ui/pages/campaigns.py", title="Match Creators", icon=":material/target:"),
+        st.Page("creo/ui/pages/deadlines.py", title="Deadlines & Notes", icon=":material/calendar_clock:"),
     ],
     "Finance": [
         st.Page("creo/ui/pages/payments.py", title="Payments", icon=":material/payments:"),
     ],
     "AI Tools": [
-        st.Page("creo/ui/pages/creator_queries.py", title="AI Helpdesk", icon=":material/chat:"),
+        st.Page("creo/ui/pages/helpdesk.py", title="AI Helpdesk", icon=":material/chat:"),
     ],
     "Settings": [
         st.Page("creo/ui/pages/settings.py", title="Configure", icon=":material/settings:"),

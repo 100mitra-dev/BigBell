@@ -1,13 +1,16 @@
-import streamlit as st
-import pandas as pd
-import uuid
-
-from creo.services.payment_service import PaymentService
-from creo.services.creator_service import CreatorService
-from creo.services.campaign_service import CampaignService
-from creo.models import Payment
-from creo.storage.csv_handler import export_payments_to_csv, import_payments_from_csv
 import logging
+import uuid
+from datetime import date
+
+import altair as alt
+import pandas as pd
+import streamlit as st
+
+from creo.models import Payment
+from creo.services.campaign_service import CampaignService
+from creo.services.creator_service import CreatorService
+from creo.services.payment_service import PaymentService
+from creo.storage.csv_handler import export_payments_to_csv, import_payments_from_csv
 
 logger = logging.getLogger(__name__)
 
@@ -21,115 +24,233 @@ ps = st.session_state.ps
 cs = st.session_state.cs
 cams = st.session_state.cams
 
-st.title("Payments")
-st.caption("Track and manage creator payments")
-try:
+STATUS_LABELS = {
+    "pending": "Pending",
+    "processed": "Processed",
+    "paid": "Paid",
+    "disputed": "Disputed",
+}
+STATUS_ICONS = {
+    "pending": ":material/schedule:",
+    "processed": ":material/done_all:",
+    "paid": ":material/check_circle:",
+    "disputed": ":material/error:",
+}
+STATUS_COLORS = {
+    "pending": "orange",
+    "processed": "blue",
+    "paid": "green",
+    "disputed": "red",
+}
 
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total payments", len(ps.payments))
-    col2.metric("Pending", ps.get_pending_count(), f"₹{ps.get_total_pending_amount():,.0f}")
-    col3.metric("Paid", ps.get_paid_count(), f"₹{ps.get_total_paid_amount():,.0f}")
-    col4.metric("Disputed", ps.get_disputed_count())
+PAY_ACTIONS_KEY = "pay_actions"
 
-    act_col1, act_col2, act_col3 = st.columns([1, 1, 1])
-    with act_col1:
-        add_btn = st.button("Add payment", use_container_width=True, icon=":material/add:")
-        if add_btn:
-            st.session_state.show_add_payment = not st.session_state.get("show_add_payment", False)
-    with act_col2:
-        import_btn = st.button("Import CSV", use_container_width=True, icon=":material/file_upload:")
-    with act_col3:
-        csv_data = export_payments_to_csv(ps.payments)
-        st.download_button("Export CSV", data=csv_data, file_name="payments.csv", mime="text/csv", use_container_width=True, icon=":material/file_download:")
 
-    if import_btn:
-        st.session_state.show_import_pay = not st.session_state.get("show_import_pay", False)
-    if st.session_state.get("show_import_pay"):
-        uploaded = st.file_uploader("Import CSV", type="csv", key="pay_csv_import")
-        if uploaded:
-            content = uploaded.getvalue().decode("utf-8")
-            imported = import_payments_from_csv(content)
-            for pmt in imported:
-                ps.add(pmt)
-            st.session_state.show_import_pay = False
-            st.success(f"Imported {len(imported)} payments")
+def _creator_name(p) -> str:
+    creator = cs.get_by_id(p.creator_id)
+    return creator.name if creator else "Unknown"
+
+
+def _campaign_title(p) -> str:
+    campaign = cams.get_by_id(p.campaign_id)
+    return campaign.title if campaign else "Unknown"
+
+
+def on_payment_action():
+    click = st.session_state.get(PAY_ACTIONS_KEY)
+    if not click:
+        return
+    order = st.session_state.get("pay_id_order", [])
+    row, label = click["row"], click["label"]
+    if row >= len(order):
+        return
+    payment_id = order[row]
+    if "Edit" in label:
+        st.session_state.edit_payment_id = payment_id
+    else:
+        st.session_state.delete_payment_id = payment_id
+
+
+def _open_add_payment():
+    st.session_state.add_payment_open = True
+
+
+def _open_import_payments():
+    st.session_state.import_payments_open = True
+
+
+def _clear_add_payment():
+    st.session_state.pop("add_payment_open", None)
+
+
+@st.dialog("Add payment", width="large", on_dismiss=_clear_add_payment)
+def add_payment_dialog():
+    creator_opts = [(c.id, f"{c.name} ({c.email})") for c in cs.creators]
+    campaign_opts = [(c.id, f"{c.title} ({c.brand})") for c in cams.campaigns]
+    creator_id = st.selectbox("Creator", options=creator_opts, format_func=lambda x: x[1], key="add_creator")
+    campaign_id = st.selectbox("Campaign", options=campaign_opts, format_func=lambda x: x[1], key="add_campaign")
+    c_amount, c_due = st.columns(2)
+    with c_amount:
+        amount = st.number_input("Amount (₹)", min_value=0.0, value=10000.0, step=1000.0, key="add_amount")
+    with c_due:
+        due_date = st.date_input("Due date", value=date.today(), key="add_due_date")
+    notes = st.text_area("Notes", placeholder="Optional payment notes...", key="add_notes")
+    if st.button("Save payment", type="primary", icon=":material/save:", width="stretch") and creator_id and campaign_id:
+        creator_id = creator_id[0] if isinstance(creator_id, (list, tuple)) else creator_id
+        campaign_id = campaign_id[0] if isinstance(campaign_id, (list, tuple)) else campaign_id
+        ps.add(Payment(
+            id=str(uuid.uuid4()),
+            creator_id=creator_id,
+            campaign_id=campaign_id,
+            amount=amount,
+            due_date=due_date.isoformat(),
+            notes=notes or None,
+            status="pending",
+        ))
+        st.session_state.pop("add_payment_open", None)
+        st.toast("Payment added")
+        st.rerun()
+
+
+def _clear_import_payments():
+    st.session_state.pop("import_payments_open", None)
+
+
+@st.dialog("Import payments from CSV", width="large", on_dismiss=_clear_import_payments)
+def import_payments_dialog():
+    uploaded = st.file_uploader("Choose a CSV file", type="csv", key="pay_csv_import")
+    if uploaded is not None:
+        content = uploaded.getvalue().decode("utf-8")
+        imported = import_payments_from_csv(content)
+        for pmt in imported:
+            ps.add(pmt)
+        st.session_state.pop("import_payments_open", None)
+        st.toast(f"Imported {len(imported)} payments")
+        st.rerun()
+
+
+def _clear_edit_payment():
+    st.session_state.pop("edit_payment_id", None)
+
+
+@st.dialog("Edit payment", width="large", on_dismiss=_clear_edit_payment)
+def edit_payment_dialog(payment_id):
+    p = ps.get_by_id(payment_id)
+    if p is None:
+        st.session_state.pop("edit_payment_id", None)
+        st.rerun()
+    creator = cs.get_by_id(p.creator_id)
+    campaign = cams.get_by_id(p.campaign_id)
+    st.caption(f"{creator.name if creator else 'Unknown'} · {campaign.title if campaign else 'Unknown'}")
+    c_amount, c_status = st.columns(2)
+    with c_amount:
+        e_amount = st.number_input("Amount (₹)", min_value=0.0, value=p.amount, step=1000.0, key=f"edit_amount_{payment_id}")
+    with c_status:
+        status_opts = list(STATUS_LABELS)
+        e_status = st.selectbox(
+            "Status",
+            options=status_opts,
+            index=status_opts.index(p.status) if p.status in status_opts else 0,
+            format_func=lambda s: STATUS_LABELS[s],
+            key=f"edit_status_{payment_id}",
+        )
+    e_notes = st.text_area("Notes", value=p.notes or "", key=f"edit_notes_{payment_id}")
+    if st.button("Save changes", type="primary", icon=":material/save:", width="stretch"):
+        p.amount = e_amount
+        p.status = e_status
+        p.notes = e_notes or None
+        ps.repo.save_all(ps.payments)
+        st.session_state.pop("edit_payment_id", None)
+        st.toast("Payment updated")
+        st.rerun()
+
+
+def _clear_delete_payment():
+    st.session_state.pop("delete_payment_id", None)
+
+
+@st.dialog("Delete payment", width="small", on_dismiss=_clear_delete_payment)
+def delete_payment_dialog(payment_id):
+    p = ps.get_by_id(payment_id)
+    if p is None:
+        st.session_state.pop("delete_payment_id", None)
+        st.rerun()
+    creator = cs.get_by_id(p.creator_id)
+    campaign = cams.get_by_id(p.campaign_id)
+    st.write(
+        f"Delete the payment of **₹{p.amount:,.0f}** to **{creator.name if creator else 'Unknown'}** "
+        f"for **{campaign.title if campaign else 'Unknown'}**? This cannot be undone."
+    )
+    with st.container(horizontal=True, horizontal_alignment="distribute"):
+        if st.button("Cancel"):
+            st.session_state.pop("delete_payment_id", None)
+            st.rerun()
+        if st.button("Delete", type="primary", icon=":material/delete:"):
+            ps.delete(payment_id)
+            st.session_state.pop("delete_payment_id", None)
+            st.toast("Payment deleted")
             st.rerun()
 
-    if st.session_state.get("show_add_payment"):
-        with st.container(border=True):
-            st.markdown("**Add payment**")
-            with st.form("add_payment_form"):
-                creator_opts = [(c.id, f"{c.name} ({c.email})") for c in cs.creators]
-                creator_id = st.selectbox("Creator", options=creator_opts, format_func=lambda x: x[1])
-                campaign_opts = [(c.id, f"{c.title} ({c.brand})") for c in cams.campaigns]
-                campaign_id = st.selectbox("Campaign", options=campaign_opts, format_func=lambda x: x[1])
-                col_amount, col_due = st.columns(2)
-                with col_amount:
-                    amount = st.number_input("Amount (₹)", min_value=0.0, value=10000.0, step=1000.0)
-                with col_due:
-                    due_date = st.date_input("Due date")
-                notes = st.text_area("Notes")
-                submitted = st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True)
-                if submitted and creator_id and campaign_id:
-                    cid = creator_id[0] if isinstance(creator_id, (list, tuple)) else creator_id
-                    camid = campaign_id[0] if isinstance(campaign_id, (list, tuple)) else campaign_id
-                    payment = Payment(
-                        id=str(uuid.uuid4()),
-                        creator_id=cid,
-                        campaign_id=camid,
-                        amount=amount,
-                        due_date=due_date.isoformat(),
-                        notes=notes or None,
-                        status="pending",
-                    )
-                    ps.add(payment)
-                    st.session_state.show_add_payment_toggle = False
-                    st.rerun()
 
-    tab1, tab2, tab3, tab4 = st.tabs(["All payments", "Pending payments", "Disputed", "Per-creator payouts"])
+st.title("Payments")
+st.caption("Track creator payments from due to paid, resolve disputes, and review per-creator payouts.")
+
+try:
+    payments = ps.payments
+
+    kpi_cols = st.columns(4, border=True)
+    with kpi_cols[0]:
+        st.metric("Total payments", len(payments), help="All payment records.")
+    with kpi_cols[1]:
+        st.metric("Pending", ps.get_pending_count(), f"₹{ps.get_total_pending_amount():,.0f} due")
+    with kpi_cols[2]:
+        st.metric("Paid", ps.get_paid_count(), f"₹{ps.get_total_paid_amount():,.0f} paid")
+    with kpi_cols[3]:
+        st.metric("Disputed", ps.get_disputed_count())
+
+    with st.container(horizontal=True, horizontal_alignment="distribute"):
+        st.button("Add payment", icon=":material/add:", on_click=_open_add_payment)
+        st.button("Import CSV", icon=":material/file_upload:", on_click=_open_import_payments)
+        st.download_button(
+            "Export CSV",
+            data=export_payments_to_csv(payments),
+            file_name="payments.csv",
+            mime="text/csv",
+            icon=":material/file_download:",
+        )
+
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "All payments",
+        "Pending payments",
+        "Disputed",
+        "Per-creator payouts",
+    ])
 
     with tab1:
-        rows = []
-        for p in ps.payments:
-            creator = cs.get_by_id(p.creator_id)
-            campaign = cams.get_by_id(p.campaign_id)
-            rows.append({
-                "ID": p.id,
-                "Creator": creator.name if creator else "Unknown",
-                "Campaign": campaign.title if campaign else "Unknown",
-                "Amount": f"₹{p.amount:,.0f}",
-                "Status": p.status,
-                "Due": p.due_date,
-            })
-        st.dataframe(pd.DataFrame(rows), hide_index=True)
-        for p in ps.payments:
-            creator = cs.get_by_id(p.creator_id)
-            campaign = cams.get_by_id(p.campaign_id)
-            c1, c2, c3 = st.columns([3, 1, 1])
-            with c1:
-                st.caption(f"{creator.name if creator else 'Unknown'} — {campaign.title if campaign else 'Unknown'} — ₹{p.amount:,.0f}")
-            with c2:
-                st.toggle("Edit", key=f"edit_pay_{p.id}", help="Edit this payment")
-            with c3:
-                if st.button("Delete", key=f"del_pay_{p.id}", icon=":material/delete:"):
-                    ps.delete(p.id)
-                    st.rerun()
-
-            if st.session_state.get(f"edit_pay_{p.id}"):
-                with st.container(border=True):
-                    st.markdown(f"**Edit payment**")
-                    with st.form(f"edit_pay_form_{p.id}"):
-                        e_amount = st.number_input("Amount (₹)", min_value=0.0, value=p.amount, step=1000.0)
-                        e_status = st.selectbox("Status", ["pending", "processed", "paid", "disputed"], index=["pending", "processed", "paid", "disputed"].index(p.status))
-                        e_notes = st.text_area("Notes", value=p.notes or "")
-                        saved = st.form_submit_button("Save", type="primary", icon=":material/save:", use_container_width=True)
-                        if saved:
-                            p.amount = e_amount
-                            p.status = e_status
-                            p.notes = e_notes or None
-                            ps.repo.save_all(ps.payments)
-                            st.session_state[f"edit_pay_{p.id}"] = False
-                            st.rerun()
+        if not payments:
+            st.info("No payments yet. Add one above or import a CSV.", icon=":material/inbox:")
+        else:
+            rows = [{
+                "Creator": _creator_name(p),
+                "Campaign": _campaign_title(p),
+                "Amount": p.amount,
+                "Status": STATUS_LABELS.get(p.status, p.status),
+                "Due date": pd.to_datetime(p.due_date, errors="coerce") if p.due_date else pd.NaT,
+                "Actions": [":material/edit: Edit", ":material/delete: Delete"],
+            } for p in payments]
+            st.session_state["pay_id_order"] = [p.id for p in payments]
+            st.dataframe(
+                pd.DataFrame(rows),
+                hide_index=True,
+                column_config={
+                    "Creator": st.column_config.TextColumn("Creator", pinned=True),
+                    "Campaign": st.column_config.TextColumn("Campaign"),
+                    "Amount": st.column_config.NumberColumn("Amount", format="₹%,.0f"),
+                    "Status": st.column_config.TextColumn("Status"),
+                    "Due date": st.column_config.DateColumn("Due date", format="MMM DD, YYYY"),
+                    "Actions": st.column_config.ButtonColumn("Actions", on_click=on_payment_action, key=PAY_ACTIONS_KEY),
+                },
+            )
 
     with tab2:
         pending = ps.filter_by_status("pending")
@@ -137,32 +258,33 @@ try:
             st.info("No pending payments.", icon=":material/check_circle:")
         else:
             for p in pending:
-                creator = cs.get_by_id(p.creator_id)
-                campaign = cams.get_by_id(p.campaign_id)
                 with st.container(border=True):
-                    c1, c2, c3 = st.columns([2, 2, 1])
+                    c1, c2 = st.columns([3, 1])
                     with c1:
-                        st.markdown(f"**{creator.name if creator else 'Unknown'}**")
+                        st.markdown(f"**{_creator_name(p)}**")
+                        st.caption(f"{_campaign_title(p)} · Due {p.due_date}")
+                        if p.notes:
+                            st.caption(p.notes)
                     with c2:
-                        st.write(campaign.title if campaign else "Unknown")
-                    with c3:
-                        st.badge(p.status, icon=":material/schedule:")
-                    st.markdown(f"**₹{p.amount:,.0f}** | Due: {p.due_date} | Notes: {p.notes or '-'}")
-                    c1, c2, c3 = st.columns([1, 1, 1])
-                    with c1:
-                        if st.button("Mark processed", key=f"proc_{p.id}", icon=":material/done_all:", use_container_width=True):
+                        st.markdown(f"**₹{p.amount:,.0f}**", text_alignment="right")
+                        st.badge(STATUS_LABELS["pending"], icon=STATUS_ICONS["pending"], color=STATUS_COLORS["pending"])
+                    with st.container(horizontal=True):
+                        if st.button("Mark processed", key=f"proc_{p.id}", type="primary", icon=":material/done_all:"):
                             ps.update_status(p.id, "processed")
+                            st.toast("Payment marked as processed")
                             st.rerun()
-                    with c2:
-                        if st.button("Delete", key=f"del_{p.id}", icon=":material/delete:", use_container_width=True):
+                        if st.button("Delete", key=f"del_{p.id}", icon=":material/delete:"):
                             ps.delete(p.id)
+                            st.toast("Payment deleted")
                             st.rerun()
-                    with c3:
-                        with st.expander("Details", icon=":material/info:"):
+                        with st.popover("Details", icon=":material/info:"):
                             st.json({
-                                "Payment ID": p.id, "Creator ID": p.creator_id,
-                                "Campaign ID": p.campaign_id, "Amount": p.amount,
-                                "Due Date": p.due_date, "Notes": p.notes,
+                                "Payment ID": p.id,
+                                "Creator ID": p.creator_id,
+                                "Campaign ID": p.campaign_id,
+                                "Amount": p.amount,
+                                "Due date": p.due_date,
+                                "Notes": p.notes,
                             })
 
     with tab3:
@@ -171,65 +293,86 @@ try:
             st.info("No disputed payments.", icon=":material/check_circle:")
         else:
             for p in disputed:
-                creator = cs.get_by_id(p.creator_id)
-                campaign = cams.get_by_id(p.campaign_id)
                 with st.container(border=True):
-                    st.error(f"**Dispute:** {creator.name if creator else 'Unknown'} — {campaign.title if campaign else 'Unknown'} — ₹{p.amount:,.0f}")
-                    st.write(f"**Notes:** {p.notes}")
-                    c1, c2 = st.columns(2)
+                    c1, c2 = st.columns([3, 1])
                     with c1:
-                        if st.button("Resolve — mark as paid", key=f"rpaid_{p.id}", icon=":material/check:", use_container_width=True):
-                            ps.update_status(p.id, "paid")
-                            st.rerun()
+                        st.markdown(f"**{_creator_name(p)}**")
+                        st.caption(f"{_campaign_title(p)} · Due {p.due_date}")
+                        if p.notes:
+                            st.caption(p.notes)
                     with c2:
-                        if st.button("Resolve — mark as processed", key=f"rproc_{p.id}", icon=":material/done_all:", use_container_width=True):
+                        st.markdown(f"**₹{p.amount:,.0f}**", text_alignment="right")
+                        st.badge(STATUS_LABELS["disputed"], icon=STATUS_ICONS["disputed"], color=STATUS_COLORS["disputed"])
+                    st.caption("Resolve the dispute by moving the payment forward:")
+                    with st.container(horizontal=True):
+                        if st.button("Mark as paid", key=f"rpaid_{p.id}", type="primary", icon=":material/check:"):
+                            ps.update_status(p.id, "paid")
+                            st.toast("Dispute resolved — marked as paid")
+                            st.rerun()
+                        if st.button("Mark as processed", key=f"rproc_{p.id}", icon=":material/done_all:"):
                             ps.update_status(p.id, "processed")
+                            st.toast("Dispute resolved — marked as processed")
                             st.rerun()
 
     with tab4:
-        st.markdown("**Per-creator payout summary**")
         creator_totals = {}
-        for p in ps.payments:
-            creator = cs.get_by_id(p.creator_id)
-            name = creator.name if creator else p.creator_id
-            if name not in creator_totals:
-                creator_totals[name] = {"total": 0, "paid": 0, "pending": 0, "count": 0}
-            creator_totals[name]["total"] += p.amount
-            creator_totals[name]["count"] += 1
+        for p in payments:
+            name = _creator_name(p)
+            totals = creator_totals.setdefault(name, {"count": 0, "total": 0.0, "paid": 0.0, "pending": 0.0})
+            totals["count"] += 1
+            totals["total"] += p.amount
             if p.status == "paid":
-                creator_totals[name]["paid"] += p.amount
+                totals["paid"] += p.amount
             elif p.status == "pending":
-                creator_totals[name]["pending"] += p.amount
+                totals["pending"] += p.amount
 
-        if creator_totals:
-            rows = []
-            for name, vals in sorted(creator_totals.items(), key=lambda x: -x[1]["total"]):
-                rows.append({
-                    "Creator": name,
-                    "Payments": vals["count"],
-                    "Total": f"₹{vals['total']:,.0f}",
-                    "Paid": f"₹{vals['paid']:,.0f}",
-                    "Pending": f"₹{vals['pending']:,.0f}",
-                })
-            st.dataframe(pd.DataFrame(rows), hide_index=True)
-
-            st.divider()
-            st.markdown("**Creator payout detail**")
-            selected_creator = st.selectbox("Select creator", options=sorted(creator_totals.keys()))
-            if selected_creator:
-                creator_payments = [p for p in ps.payments if cs.get_by_id(p.creator_id) and cs.get_by_id(p.creator_id).name == selected_creator]
-                detail_rows = []
-                for p in creator_payments:
-                    campaign = cams.get_by_id(p.campaign_id)
-                    detail_rows.append({
-                        "Campaign": campaign.title if campaign else "Unknown",
-                        "Amount": f"₹{p.amount:,.0f}",
-                        "Status": p.status,
-                        "Due": p.due_date,
-                    })
-                st.dataframe(pd.DataFrame(detail_rows), hide_index=True)
-        else:
+        if not creator_totals:
             st.info("No payment data available.", icon=":material/info:")
+        else:
+            summary_rows = [{
+                "Creator": name,
+                "Payments": vals["count"],
+                "Total": vals["total"],
+                "Paid": vals["paid"],
+                "Pending": vals["pending"],
+            } for name, vals in sorted(creator_totals.items(), key=lambda x: -x[1]["total"])]
+            summary_df = pd.DataFrame(summary_rows)
+
+            chart = alt.Chart(summary_df.nlargest(10, "Total")).mark_bar().encode(
+                x=alt.X("Total:Q", title="Total payout (₹)"),
+                y=alt.Y("Creator:N", sort="-x", title=None),
+                color=alt.value("#1E88E5"),
+            ).properties(height=240)
+            st.altair_chart(chart)
+
+            st.markdown("#### Payout summary")
+            st.dataframe(summary_df, hide_index=True, column_config={
+                "Payments": st.column_config.NumberColumn(width="small"),
+                "Total": st.column_config.NumberColumn("Total", format="₹%,.0f"),
+                "Paid": st.column_config.NumberColumn("Paid", format="₹%,.0f"),
+                "Pending": st.column_config.NumberColumn("Pending", format="₹%,.0f"),
+            })
+
+            st.markdown("#### Payout detail")
+            selected = st.selectbox("Select creator", options=list(creator_totals))
+            detail_rows = [{
+                "Campaign": _campaign_title(p),
+                "Amount": p.amount,
+                "Status": STATUS_LABELS.get(p.status, p.status),
+                "Due date": p.due_date,
+            } for p in payments if _creator_name(p) == selected]
+            st.dataframe(pd.DataFrame(detail_rows), hide_index=True, column_config={
+                "Amount": st.column_config.NumberColumn("Amount", format="₹%,.0f"),
+            })
+
+    if st.session_state.get("add_payment_open"):
+        add_payment_dialog()
+    if st.session_state.get("import_payments_open"):
+        import_payments_dialog()
+    if st.session_state.get("edit_payment_id"):
+        edit_payment_dialog(st.session_state["edit_payment_id"])
+    if st.session_state.get("delete_payment_id"):
+        delete_payment_dialog(st.session_state["delete_payment_id"])
 
 except Exception as e:
     st.error(f"Something went wrong: {e}")

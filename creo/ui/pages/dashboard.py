@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from creo.services.creator_service import CreatorService
 from creo.services.campaign_service import CampaignService
 from creo.services.payment_service import PaymentService
-from creo.utils.helpers import load_applications
+from creo.utils.json_io import load_applications
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,10 +22,10 @@ cs = st.session_state.cs
 cams = st.session_state.cams
 ps = st.session_state.ps
 
-CREATORS_PAGE = "creo/ui/pages/creator_crm.py"
+CREATORS_PAGE = "creo/ui/pages/creators.py"
 REVIEW_PAGE = "creo/ui/pages/creator_validation.py"
-MATCHING_PAGE = "creo/ui/pages/campaign_matching.py"
-DEADLINES_PAGE = "creo/ui/pages/follow_ups.py"
+MATCHING_PAGE = "creo/ui/pages/campaigns.py"
+DEADLINES_PAGE = "creo/ui/pages/deadlines.py"
 PAYMENTS_PAGE = "creo/ui/pages/payments.py"
 
 STATUS_ORDER = ["pending", "onboarding", "active", "inactive", "rejected"]

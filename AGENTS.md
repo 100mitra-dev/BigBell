@@ -28,6 +28,7 @@ ruff format --check creo/ tests/
 ## Key conventions
 - All AI agents have `_mock_*` (deterministic) and `_ai_*` (LLM) methods
 - Switch provider in Settings or via `AI_PROVIDER` env var
-- Use `get_*_repo()` factory from `creo/storage/base.py` for data access
+- Use `get_*_repo()` factory from `creo/storage/factories.py` for data access
+- Services extend `CachedRepositoryService[T]` from `creo/services/base.py`
 - All Pydantic models in `creo/models.py`
 - Embeddings use `ONNXMiniLM_L6_V2` (local, CPU-only, no API key)

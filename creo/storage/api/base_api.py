@@ -1,4 +1,4 @@
-from creo.runtime_config import get_youtube_key, get_instagram_key, get_whatsapp_key
+from creo.utils.runtime_settings import get_youtube_key, get_instagram_key, get_whatsapp_key
 
 
 class BaseApiRepository:

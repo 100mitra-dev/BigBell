@@ -7,7 +7,7 @@ from creo.services.campaign_service import CampaignService
 from creo.services.follow_up_service import FollowUpNoteService
 from creo.services.assignment_service import AssignmentService, STATUS_LABELS, STATUS_COLORS, AssignmentStatus
 from creo.models import FollowUpNote
-from creo.utils.helpers import days_until, today_str
+from creo.utils.dates import days_until, today_str
 import logging
 
 logger = logging.getLogger(__name__)
@@ -148,4 +148,4 @@ try:
 
 except Exception as e:
     st.error(f"Something went wrong: {e}")
-    logger.exception("Error in follow_ups")
+    logger.exception("Error in deadlines")

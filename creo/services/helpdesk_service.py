@@ -6,7 +6,7 @@ from datetime import datetime
 from creo.agents.base import BaseAgent
 from creo.models import ChatMessage, Creator
 from creo.rag.faq_kb import FAQKnowledgeBase, AUTO_ANSWER_MAX_DIST, confidence_for_distance
-from creo.utils.helpers import load_json, save_json
+from creo.utils.json_io import load_json, save_json
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +22,12 @@ DEMO_QUESTIONS = [
 ]
 
 
-class _SuggestionAgent(BaseAgent):
-    pass
-
-
 class HelpdeskService:
     def __init__(self, history_file: str = CHAT_HISTORY_FILE, kb: FAQKnowledgeBase | None = None):
         self.kb = kb or FAQKnowledgeBase()
         self._history_file = history_file
         self._messages: dict[str, list[ChatMessage]] = {}
-        self._suggester = _SuggestionAgent()
+        self._suggester = BaseAgent()
         self._load_history()
 
     def _load_history(self):

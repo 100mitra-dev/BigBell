@@ -8,7 +8,7 @@ from creo.models import Creator, CreatorStatus, PlatformInfo
 class YouTubeCreatorRepository(CreatorRepository):
     @property
     def use_real_api(self) -> bool:
-        from creo.runtime_config import get_youtube_key
+        from creo.utils.runtime_settings import get_youtube_key
         return bool(get_youtube_key())
 
     def list_all(self) -> list[Creator]:
@@ -32,7 +32,7 @@ class YouTubeCreatorRepository(CreatorRepository):
         raise NotImplementedError("YouTube API repository is read-only")
 
     def _fetch_from_youtube(self) -> list[Creator]:
-        from creo.runtime_config import get_youtube_key
+        from creo.utils.runtime_settings import get_youtube_key
         key = get_youtube_key()
         try:
             import requests

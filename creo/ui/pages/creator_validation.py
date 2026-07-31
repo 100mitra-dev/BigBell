@@ -4,15 +4,16 @@ import pandas as pd
 import streamlit as st
 
 from creo.agents.application_reviewer import ApplicationReviewerAgent
-from creo.agents.categorization_agent import CategorizationAgent
-from creo.agents.verification_agent import VerificationAgent
+from creo.agents.categorization import CategorizationAgent
+from creo.agents.verification import VerificationAgent
 from creo.config import LANGUAGES, get_all_niches
 from creo.models import CreatorStatus
 from creo.services.campaign_service import CampaignService
 from creo.services.creator_service import CreatorService
 from creo.ui.components.cards import creator_avatar
 from creo.ui.components.platforms import platform_link_markdown, render_platform_grid
-from creo.utils.helpers import load_applications, save_applications, today_str
+from creo.utils.dates import today_str
+from creo.utils.json_io import load_applications, save_applications
 
 logger = logging.getLogger(__name__)
 

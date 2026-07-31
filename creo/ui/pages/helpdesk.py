@@ -11,7 +11,7 @@ from creo.services.helpdesk_service import (
     DEMO_QUESTIONS,
     CHANNELS,
 )
-from creo.utils.helpers import load_faqs, load_json
+from creo.utils.json_io import load_faqs, load_json
 from creo.services.creator_service import CreatorService
 import logging
 

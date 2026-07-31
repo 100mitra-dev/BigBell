@@ -1,6 +1,6 @@
 from langchain_core.documents import Document
 
-from creo.utils.helpers import load_faqs
+from creo.utils.json_io import load_faqs
 
 
 def load_faq_documents() -> list[Document]:

@@ -1,5 +1,5 @@
 from creo.models import Application
-from creo.utils.helpers import load_applications, save_applications
+from creo.utils.json_io import load_applications, save_applications
 
 
 class JsonApplicationRepository:

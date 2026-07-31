@@ -2,7 +2,7 @@ from typing import Optional
 
 from creo.storage.base import CreatorRepository
 from creo.models import Creator
-from creo.utils.helpers import load_creators, save_creators
+from creo.utils.json_io import load_creators, save_creators
 
 
 class JsonCreatorRepository(CreatorRepository):

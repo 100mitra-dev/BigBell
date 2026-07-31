@@ -2,7 +2,7 @@ from typing import Optional
 
 from creo.storage.base import CampaignRepository
 from creo.models import Campaign
-from creo.utils.helpers import load_campaigns
+from creo.utils.json_io import load_campaigns
 
 
 class JsonCampaignRepository(CampaignRepository):
@@ -32,5 +32,5 @@ class JsonCampaignRepository(CampaignRepository):
         self._persist()
 
     def _persist(self):
-        from creo.utils.helpers import save_json
+        from creo.utils.json_io import save_json
         save_json("campaigns.json", [c.model_dump() for c in self._campaigns])

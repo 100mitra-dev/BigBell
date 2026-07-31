@@ -1,42 +1,23 @@
 import logging
-from typing import Optional
 
-from creo.storage.base import get_payment_repo
+from creo.storage.factories import get_payment_repo
 from creo.models import Payment
+from creo.services.base import CachedRepositoryService
 
 logger = logging.getLogger(__name__)
 
 
-class PaymentService:
+class PaymentService(CachedRepositoryService[Payment]):
     def __init__(self):
-        self._payments: list[Payment] = []
-        self.repo = get_payment_repo()
+        super().__init__()
         logger.debug("PaymentService initialized")
+
+    def _make_repo(self):
+        return get_payment_repo()
 
     @property
     def payments(self) -> list[Payment]:
-        if not self._payments:
-            self._payments = self.repo.list_all()
-        return self._payments
-
-    def refresh(self):
-        self._payments = self.repo.list_all()
-
-    def get_by_id(self, payment_id: str) -> Optional[Payment]:
-        for p in self.payments:
-            if p.id == payment_id:
-                return p
-        return None
-
-    def add(self, payment: Payment):
-        self.repo.add(payment)
-        self.refresh()
-        logger.info("Added payment %s (creator=%s, amount=%.2f)", payment.id, payment.creator_id, payment.amount)
-
-    def delete(self, payment_id: str):
-        self.repo.delete(payment_id)
-        self.refresh()
-        logger.info("Deleted payment %s", payment_id)
+        return self.items
 
     def filter_by_status(self, status: str) -> list[Payment]:
         return [p for p in self.payments if p.status == status]

@@ -1,8 +1,9 @@
 import pytest
-from creo.agents.matching_agent import MatchingAgent
-from creo.agents.categorization_agent import CategorizationAgent
+from creo.agents.matching import MatchingAgent
+from creo.agents.categorization import CategorizationAgent
 from creo.agents.application_reviewer import ApplicationReviewerAgent
-from creo.agents.verification_agent import VerificationAgent
+from creo.agents.verification import VerificationAgent
+from creo.agents.extraction import CreatorExtractionAgent, extract_pdf_text, missing_required_fields
 from creo.models import Creator, CreatorStatus
 
 
@@ -138,3 +139,86 @@ class TestVerificationAgent:
         r1 = agent._mock_verify(sample_creator)
         r2 = agent._mock_verify(sample_creator)
         assert r1 == r2
+
+
+class TestCreatorExtractionAgent:
+    def test_mock_parse_whatsapp_style_text(self):
+        agent = CreatorExtractionAgent()
+        text = (
+            "Hi team, this is Arjun Mehta. I run a gaming channel on YouTube — "
+            "youtube.com/@arjunplays, 250k subscribers. I make gaming and tech content "
+            "in English. My email is arjun.mehta@email.com and phone is +91 98765 43211."
+        )
+        result = agent._mock_parse_text(text)
+        assert result["name"] == "Arjun Mehta"
+        assert result["email"] == "arjun.mehta@email.com"
+        assert result["phone"] == "+919876543211"
+        assert result["primary_niche"] == "Gaming"
+        assert result["primary_language"] == "English"
+        assert result["platforms"]["youtube"]["handle"] == "@arjunplays"
+        assert result["platforms"]["youtube"]["followers"] == 250000
+        assert result["notes"] == text
+
+    def test_mock_parse_beauty_intro(self):
+        agent = CreatorExtractionAgent()
+        result = agent._mock_parse_text(
+            "Hi, I'm Priya Sharma. I'm a beauty content creator from Mumbai. "
+            "My Instagram @priyabeauty has 125k followers. I make makeup tutorials "
+            "in Hindi and English. Reach me at priya.sharma@email.com or +91 98765 43210."
+        )
+        assert result["name"] == "Priya Sharma"
+        assert result["email"] == "priya.sharma@email.com"
+        assert result["phone"] == "+919876543210"
+        assert result["primary_niche"] == "Beauty & Makeup"
+        assert result["primary_language"] == "Hindi"
+        assert result["platforms"]["instagram"]["handle"] == "@priyabeauty"
+        assert result["platforms"]["instagram"]["followers"] == 125000
+
+    def test_mock_parse_email_fallback_name(self):
+        agent = CreatorExtractionAgent()
+        result = agent._mock_parse_text(
+            "Makeup collab — priya.sharma@email.com, based in Mumbai. "
+            "90k followers on Instagram @priyabeauty."
+        )
+        assert result["name"] == "Priya Sharma"
+        assert result["primary_niche"] == "Beauty & Makeup"
+        assert result["platforms"]["instagram"]["followers"] == 90000
+
+    def test_mock_parse_skips_email_handle(self):
+        agent = CreatorExtractionAgent()
+        result = agent._mock_parse_text(
+            "Contact rohit.kumar@email.com. 50k followers on YouTube @rohitkumar."
+        )
+        assert result["email"] == "rohit.kumar@email.com"
+        assert "youtube" in result["platforms"]
+        assert result["platforms"]["youtube"]["handle"] == "@rohitkumar"
+        assert all("email.com" not in info["handle"] for info in result["platforms"].values())
+
+    def test_mock_parse_missing_fields(self):
+        agent = CreatorExtractionAgent()
+        result = agent._mock_parse_text("Just a random note with no profile details.")
+        missing = missing_required_fields(result)
+        assert missing == ["name", "email", "primary_niche", "primary_language"]
+
+    def test_parse_pdf_and_extract(self):
+        from io import BytesIO
+
+        from reportlab.pdfgen import canvas
+
+        buf = BytesIO()
+        c = canvas.Canvas(buf)
+        c.drawString(72, 720, "Name: Kavya Nair")
+        c.drawString(72, 700, "Email: kavya.nair@email.com")
+        c.drawString(72, 680, "Phone: +91 98765 43212")
+        c.save()
+        text = extract_pdf_text(buf.getvalue())
+        assert "Kavya Nair" in text
+        result = CreatorExtractionAgent()._mock_parse_text(text)
+        assert result["name"] == "Kavya Nair"
+        assert result["email"] == "kavya.nair@email.com"
+        assert result["phone"] == "+919876543212"
+
+    def test_mock_parse_deterministic(self):
+        agent = CreatorExtractionAgent()
+        text = "Hi, I'm Ravi Kumar. Gaming creator on YouTube @ravikumar, 1.2M subscribers."
+        assert agent._mock_parse_text(text) == agent._mock_parse_text(text)

@@ -1,7 +1,7 @@
 import streamlit as st
 
 from creo.ui.components.layout import sync_config
-from creo.runtime_config import set_youtube_key, set_instagram_key, set_whatsapp_key, set_data_source, get_data_source, persist_config, set_openai_model, set_gemini_model
+from creo.utils.runtime_settings import set_youtube_key, set_instagram_key, set_whatsapp_key, set_data_source, get_data_source, persist_config, set_openai_model, set_gemini_model
 import logging
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ try:
             )
 
             def _on_openai_model():
-                from creo.runtime_config import set_openai_model, persist_config
+                from creo.utils.runtime_settings import set_openai_model, persist_config
                 set_openai_model(st.session_state.openai_model)
                 persist_config()
 
@@ -108,7 +108,7 @@ try:
             )
 
             def _on_gemini_model():
-                from creo.runtime_config import set_gemini_model, persist_config
+                from creo.utils.runtime_settings import set_gemini_model, persist_config
                 set_gemini_model(st.session_state.gemini_model)
                 persist_config()
 
@@ -203,7 +203,7 @@ try:
         st.caption("Debug logging for API calls")
 
         def _on_debug_toggle():
-            from creo.runtime_config import set_debug_logging, persist_config
+            from creo.utils.runtime_settings import set_debug_logging, persist_config
             set_debug_logging(st.session_state.debug_logging)
             persist_config()
 
@@ -217,7 +217,7 @@ try:
             count = len(st.session_state.get("api_logs", []))
             st.caption(f"{count} log entries captured so far")
             if count > 0 and st.button("Clear logs", icon=":material/delete_sweep:"):
-                from creo.debug_logger import clear_logs
+                from creo.utils.debug_logging import clear_logs
                 clear_logs()
                 st.rerun()
 

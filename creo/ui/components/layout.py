@@ -11,14 +11,14 @@ CONFIG_DEFAULTS = {
 
 
 def init_app_state():
-    from creo.runtime_config import _RUNTIME_CONFIG, load_persisted_config
+    from creo.utils.runtime_settings import _RUNTIME_CONFIG, load_persisted_config
     load_persisted_config()
     for key, default in CONFIG_DEFAULTS.items():
         st.session_state[key] = _RUNTIME_CONFIG.get(key, default)
 
 
 def sync_config():
-    from creo.runtime_config import (
+    from creo.utils.runtime_settings import (
         set_provider, set_openai_key, set_gemini_key, persist_config,
     )
     set_provider(st.session_state.provider)

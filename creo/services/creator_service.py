@@ -1,43 +1,24 @@
 import logging
 import random
-from typing import Optional
 
-from creo.storage.base import get_creator_repo
+from creo.storage.factories import get_creator_repo
 from creo.models import Creator, CreatorStatus
+from creo.services.base import CachedRepositoryService
 
 logger = logging.getLogger(__name__)
 
 
-class CreatorService:
+class CreatorService(CachedRepositoryService[Creator]):
     def __init__(self):
-        self._creators: list[Creator] = []
-        self.repo = get_creator_repo()
+        super().__init__()
         logger.debug("CreatorService initialized")
+
+    def _make_repo(self):
+        return get_creator_repo()
 
     @property
     def creators(self) -> list[Creator]:
-        if not self._creators:
-            self._creators = self.repo.list_all()
-        return self._creators
-
-    def refresh(self):
-        self._creators = self.repo.list_all()
-
-    def get_by_id(self, creator_id: str) -> Optional[Creator]:
-        for c in self.creators:
-            if c.id == creator_id:
-                return c
-        return None
-
-    def add(self, creator: Creator):
-        self.repo.add(creator)
-        self.refresh()
-        logger.info("Added creator %s (%s)", creator.id, creator.name)
-
-    def delete(self, creator_id: str):
-        self.repo.delete(creator_id)
-        self.refresh()
-        logger.info("Deleted creator %s", creator_id)
+        return self.items
 
     def search(self, query: str = "") -> list[Creator]:
         if not query:

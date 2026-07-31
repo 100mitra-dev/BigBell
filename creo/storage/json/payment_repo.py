@@ -2,7 +2,7 @@ from typing import Optional
 
 from creo.storage.base import PaymentRepository
 from creo.models import Payment
-from creo.utils.helpers import load_payments
+from creo.utils.json_io import load_payments
 
 
 class JsonPaymentRepository(PaymentRepository):
@@ -32,5 +32,5 @@ class JsonPaymentRepository(PaymentRepository):
         self._persist()
 
     def _persist(self):
-        from creo.utils.helpers import save_json
+        from creo.utils.json_io import save_json
         save_json("payments.json", [p.model_dump() for p in self._payments])

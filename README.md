@@ -6,7 +6,7 @@ AI-powered platform for creator onboarding, management, and campaign operations.
 
 ```bash
 pip install -r requirements.txt
-streamlit run streamlit_app.py
+streamlit run app.py
 ```
 
 The app launches in **mock mode** — fully functional with rule-based AI responses.
@@ -29,34 +29,33 @@ pip install sentence-transformers
 ## Project structure
 
 ```
-streamlit_app.py              # Entry point with navigation
-app_pages/                    # Page modules (operations, management, insights)
-    dashboard.py
-    applications.py
-    verification.py
-    categorization.py
-    campaign_matching.py
-    creator_queries.py
-    follow_ups.py
-    payments.py
-    creator_crm.py
-    settings.py               # Web-based configuration
-app/components/               # Reusable UI building blocks
-    cards.py
-    layout.py
-src/                          # Core library (no streamlit dependency)
-    core/
-        config.py             # Configuration constants
-        models.py             # Pydantic data models
-        runtime_config.py     # Runtime configuration (provider, keys)
-        agents/               # AI agents (review, verify, categorize, match, query)
-        rag/                  # RAG pipeline (embeddings, vector store, retrieval)
-        services/             # Data services (creator, campaign, payment)
+app.py                        # Streamlit entry point with navigation
+creo/
+    agents/                   # AI agents (base + review, verify, categorize, match, query)
+    models.py                 # Pydantic data models
+    rag/                      # RAG pipeline (embeddings, vector store, retrieval, FAQ KB)
+    services/                 # Data services (creator, campaign, payment, assignment, follow-up, helpdesk)
+        base.py               # CachedRepositoryService[T] base class
+    storage/
+        base.py               # Repository ABCs
+        factories.py          # get_*_repo() factory functions
+        json/                 # JSON-backed repositories
+        db/                   # SQLite-backed repositories + migrations
+        api/                  # Social API clients (YouTube, Instagram, WhatsApp)
+        csv_handler.py
+    ui/
+        pages/                # Page modules (dashboard, creators, campaigns, deadlines, ...)
+        components/           # Reusable UI building blocks (cards, layout, platforms)
     utils/
-        helpers.py            # JSON I/O, date helpers, search
+        json_io.py            # JSON load/save + typed entity loaders
+        dates.py              # date helpers (today_str, days_until)
+        debug_logging.py      # API log entries
+        runtime_settings.py   # Runtime configuration (provider, keys)
+api/                          # FastAPI REST layer (experimental)
 data/
-    sample_data/              # 50 creators, 22 campaigns, 30 FAQs, 15 payments
+    sample_data/              # 52 creators, 22 campaigns, 18 applications, 15 payments
     vector_store/             # ChromaDB persistence (auto-created)
+tests/                        # pytest suite
 ```
 
 ## Features
@@ -74,13 +73,14 @@ data/
 ## Architecture
 
 ```
-app/ (streamlit UI)  →  app/components/ (reusable widgets)
-                     →  app_pages/ (page modules)
+creo/ui (streamlit UI)  →  creo/ui/pages/ (page modules)
+                       →  creo/ui/components/ (reusable widgets)
 
-src/ (core library)  →  src/core/agents/ (AI agents)
-                     →  src/core/rag/ (vector search)
-                     →  src/core/services/ (data layer)
-                     →  src/utils/ (helpers)
+creo/ (core library)   →  creo/agents/ (AI agents)
+                       →  creo/rag/ (vector search)
+                       →  creo/services/ (data layer)
+                       →  creo/storage/ (repositories + factories)
+                       →  creo/utils/ (helpers)
 ```
 
-The `src/` layer has no Streamlit dependency — it can be used independently.
+The `creo/` core layer (agents, services, storage, utils) has no Streamlit dependency — it can be used independently.

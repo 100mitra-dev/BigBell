@@ -9,7 +9,7 @@ from langchain_chroma import Chroma
 from creo.config import VECTOR_STORE_DIR
 from creo.models import FAQ
 from creo.rag.embeddings import get_local_embeddings
-from creo.utils.helpers import load_faqs, load_json, save_json
+from creo.utils.json_io import load_faqs, load_json, save_json
 
 logger = logging.getLogger(__name__)
 

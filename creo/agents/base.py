@@ -1,8 +1,8 @@
 import logging
 import time
 
-from creo.runtime_config import get_provider, get_openai_key, get_gemini_key, get_openai_model, get_gemini_model
-from creo.debug_logger import APILogEntry, add_log
+from creo.utils.runtime_settings import get_provider, get_openai_key, get_gemini_key, get_openai_model, get_gemini_model
+from creo.utils.debug_logging import APILogEntry, add_log
 
 logger = logging.getLogger(__name__)
 

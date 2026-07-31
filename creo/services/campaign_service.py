@@ -1,42 +1,23 @@
 import logging
-from typing import Optional
 
-from creo.storage.base import get_campaign_repo
+from creo.storage.factories import get_campaign_repo
 from creo.models import Campaign
+from creo.services.base import CachedRepositoryService
 
 logger = logging.getLogger(__name__)
 
 
-class CampaignService:
+class CampaignService(CachedRepositoryService[Campaign]):
     def __init__(self):
-        self._campaigns: list[Campaign] = []
-        self.repo = get_campaign_repo()
+        super().__init__()
         logger.debug("CampaignService initialized")
+
+    def _make_repo(self):
+        return get_campaign_repo()
 
     @property
     def campaigns(self) -> list[Campaign]:
-        if not self._campaigns:
-            self._campaigns = self.repo.list_all()
-        return self._campaigns
-
-    def refresh(self):
-        self._campaigns = self.repo.list_all()
-
-    def get_by_id(self, campaign_id: str) -> Optional[Campaign]:
-        for c in self.campaigns:
-            if c.id == campaign_id:
-                return c
-        return None
-
-    def add(self, campaign: Campaign):
-        self.repo.add(campaign)
-        self.refresh()
-        logger.info("Added campaign %s (%s)", campaign.id, campaign.title)
-
-    def delete(self, campaign_id: str):
-        self.repo.delete(campaign_id)
-        self.refresh()
-        logger.info("Deleted campaign %s", campaign_id)
+        return self.items
 
     def search(self, query: str = "") -> list[Campaign]:
         if not query:

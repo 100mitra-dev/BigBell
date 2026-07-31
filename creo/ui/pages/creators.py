@@ -7,6 +7,12 @@ from creo.services.payment_service import PaymentService
 from creo.models import Creator, CreatorStatus
 from creo.config import get_all_niches, LANGUAGES
 from creo.storage.csv_handler import export_creators_to_csv, import_creators_from_csv
+from creo.ui.components.platforms import (
+    handle_display,
+    platform_follower_label,
+    platform_icon,
+    platform_url,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,17 +26,6 @@ if "ps" not in st.session_state:
 cs = st.session_state.cs
 cams = st.session_state.cams
 ps = st.session_state.ps
-
-PLATFORM_META = {
-    "youtube": {"icon": ":material/smart_display:", "url": "https://youtube.com/@{handle}"},
-    "instagram": {"icon": ":material/photo_camera:", "url": "https://instagram.com/{handle}"},
-    "twitter": {"icon": ":material/tag:", "url": "https://x.com/{handle}"},
-    "x": {"icon": ":material/tag:", "url": "https://x.com/{handle}"},
-    "twitch": {"icon": ":material/videogame_asset:", "url": "https://twitch.tv/{handle}"},
-    "tiktok": {"icon": ":material/music_video:", "url": "https://tiktok.com/@{handle}"},
-    "linkedin": {"icon": ":material/business:", "url": "https://linkedin.com/in/{handle}"},
-    "facebook": {"icon": ":material/thumb_up:", "url": "https://facebook.com/{handle}"},
-}
 
 st.title("Creator management")
 st.caption("Manage and maintain creator records")
@@ -138,13 +133,10 @@ try:
                 if creator.platforms:
                     lines = []
                     for plat, info in creator.platforms.items():
-                        meta = PLATFORM_META.get(plat.lower())
-                        if meta:
-                            url = meta["url"].replace("{handle}", info.handle)
-                            label = "subscribers" if plat.lower() == "youtube" else "followers"
-                            lines.append(f"{meta['icon']} [{info.handle}]({url}) — {info.followers:,} {label}")
-                        else:
-                            lines.append(f":material/link: {info.handle} — {info.followers:,} followers")
+                        display = handle_display(info.handle)
+                        url = platform_url(plat, info.handle)
+                        link = f"[{display}]({url})" if url else f"`{display}`"
+                        lines.append(f"{platform_icon(plat)} {link} — {info.followers:,} {platform_follower_label(plat)}")
                     st.markdown("  \n".join(lines))
                 else:
                     st.caption("No social platforms")
@@ -212,12 +204,10 @@ try:
                 if creator.platforms:
                     for plat, info in creator.platforms.items():
                         v = ":material/check_circle:" if info.verified else ":material/cancel:"
-                        meta = PLATFORM_META.get(plat.lower())
-                        if meta:
-                            url = meta["url"].replace("{handle}", info.handle)
-                            st.markdown(f"- {meta['icon']} **{plat.title()}**: [{info.handle}]({url}) ({info.followers:,}) {v}")
-                        else:
-                            st.markdown(f"- :material/link: **{plat.title()}**: {info.handle} ({info.followers:,}) {v}")
+                        display = handle_display(info.handle)
+                        url = platform_url(plat, info.handle)
+                        link = f"[{display}]({url})" if url else f"`{display}`"
+                        st.markdown(f"- {platform_icon(plat)} **{plat.title()}**: {link} ({info.followers:,}) {v}")
                 else:
                     st.caption("No platforms linked")
             with cx[1]:
@@ -241,4 +231,4 @@ try:
 
 except Exception as e:
     st.error(f"Something went wrong: {e}")
-    logger.exception("Error in creator_crm")
+    logger.exception("Error in creators")

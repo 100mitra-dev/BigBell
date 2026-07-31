@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
-from creo.agents.query_agent import QueryAgent
+from creo.agents.query import QueryAgent
 
 router = APIRouter()
 agent = QueryAgent()

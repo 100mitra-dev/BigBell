@@ -5,7 +5,7 @@ import uuid
 from creo.services.creator_service import CreatorService
 from creo.services.campaign_service import CampaignService
 from creo.services.assignment_service import AssignmentService, STATUS_LABELS, STATUS_COLORS, NEXT_STATUS, AssignmentStatus
-from creo.agents.matching_agent import MatchingAgent
+from creo.agents.matching import MatchingAgent
 from creo.models import Campaign
 from creo.config import get_all_niches, LANGUAGES
 from creo.storage.csv_handler import export_campaigns_to_csv, import_campaigns_from_csv
@@ -364,4 +364,4 @@ try:
 
 except Exception as e:
     st.error(f"Something went wrong: {e}")
-    logger.exception("Error in campaign_matching")
+    logger.exception("Error in campaigns")
