@@ -21,6 +21,8 @@ _RUNTIME_CONFIG = {
     "modash_key": "",
     "meta_api_base_url": "",
     "meta_api_version": "",
+    "meta_api_timeout_s": "",
+    "meta_api_page_limit": "",
     "discovery_sources": "",
     "admin_key": "",
 }
@@ -38,13 +40,13 @@ _ENV_MAP = {
     "whatsapp_key": "WHATSAPP_API_KEY",
     "debug_logging": "DEBUG_LOGGING",
     "meta_marketplace_key": "META_MARKETPLACE_API_KEY",
-    "modash_key": "MODASH_API_KEY",
     "meta_api_base_url": "META_API_BASE_URL",
     "meta_api_version": "META_API_VERSION",
+    "meta_api_timeout_s": "META_API_TIMEOUT_S",
+    "meta_api_page_limit": "META_API_PAGE_LIMIT",
     "data_source": "DATA_SOURCE",
     "admin_key": "ADMIN_KEY",
 }
-
 
 def load_persisted_config():
     load_dotenv(str(ENV_PATH), override=True)
@@ -173,9 +175,36 @@ def set_meta_api_base_url(base_url: str):
 def get_meta_api_version() -> str:
     return _RUNTIME_CONFIG.get("meta_api_version", "") or os.getenv("META_API_VERSION", "")
 
-
 def set_meta_api_version(version: str):
     _RUNTIME_CONFIG["meta_api_version"] = version
+
+
+def get_meta_api_timeout_s() -> int:
+    val = _RUNTIME_CONFIG.get("meta_api_timeout_s", "")
+    if val:
+        try:
+            return int(val)
+        except (TypeError, ValueError):
+            pass
+    return int(os.getenv("META_API_TIMEOUT_S", "15"))
+
+
+def set_meta_api_timeout_s(timeout: int):
+    _RUNTIME_CONFIG["meta_api_timeout_s"] = str(timeout)
+
+
+def get_meta_api_page_limit() -> int:
+    val = _RUNTIME_CONFIG.get("meta_api_page_limit", "")
+    if val:
+        try:
+            return int(val)
+        except (TypeError, ValueError):
+            pass
+    return int(os.getenv("META_API_PAGE_LIMIT", "100"))
+
+
+def set_meta_api_page_limit(limit: int):
+    _RUNTIME_CONFIG["meta_api_page_limit"] = str(limit)
 
 
 def get_discovery_sources() -> str:
@@ -244,5 +273,7 @@ def update_from_env():
     _RUNTIME_CONFIG["modash_key"] = os.getenv("MODASH_API_KEY", "")
     _RUNTIME_CONFIG["meta_api_base_url"] = os.getenv("META_API_BASE_URL", "")
     _RUNTIME_CONFIG["meta_api_version"] = os.getenv("META_API_VERSION", "")
+    _RUNTIME_CONFIG["meta_api_timeout_s"] = os.getenv("META_API_TIMEOUT_S", "")
+    _RUNTIME_CONFIG["meta_api_page_limit"] = os.getenv("META_API_PAGE_LIMIT", "")
     _RUNTIME_CONFIG["discovery_sources"] = os.getenv("DISCOVERY_SOURCES", "")
     _RUNTIME_CONFIG["admin_key"] = os.getenv("ADMIN_KEY", "")

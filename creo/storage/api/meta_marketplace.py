@@ -1,10 +1,13 @@
 """BigBell Meta Creator Marketplace repository — fetches creators from Meta Graph API."""
+import logging
 import random
 from typing import Optional
 
 from creo.storage.api.base_api import BaseApiRepository
 from creo.storage.base import CreatorRepository
 from creo.models import Creator, CreatorStatus, PlatformInfo
+
+logger = logging.getLogger(__name__)
 
 
 class MetaMarketplaceRepository(BaseApiRepository, CreatorRepository):
@@ -44,26 +47,70 @@ class MetaMarketplaceRepository(BaseApiRepository, CreatorRepository):
     def save_all(self, creators: list[Creator]):
         raise NotImplementedError("Meta Creator Marketplace repository is read-only")
 
-    def _fetch_from_meta(self) -> list[Creator]:
+    def _build_params(self, filters: Optional[dict] = None) -> dict:
+        params = {"limit": self._get_page_limit()}
+        if filters:
+            if filters.get("search_query"):
+                params["q"] = filters["search_query"]
+            if filters.get("niche") and filters["niche"] != "All":
+                params["category"] = filters["niche"]
+            if filters.get("min_followers"):
+                params["followers_min"] = filters["min_followers"]
+            if filters.get("max_followers"):
+                params["followers_max"] = filters["max_followers"]
+            if filters.get("content_type") and filters["content_type"] != "ALL":
+                params["content_type"] = filters["content_type"]
+            if filters.get("audience_type") and filters["audience_type"] != "ALL":
+                params["audience_type"] = filters["audience_type"]
+            if filters.get("sort_by"):
+                params["sort_by"] = filters["sort_by"]
+            if filters.get("platform"):
+                params["platform"] = filters["platform"].upper()
+            if filters.get("region"):
+                params["region"] = filters["region"]
+            if filters.get("language") and filters["language"] != "All":
+                from creo.config import lang_to_code
+                code = lang_to_code(filters["language"])
+                if code:
+                    params["language"] = code
+        return params
+
+    def _get_page_limit(self) -> int:
+        try:
+            from creo.storage.api.meta_config import get_meta_page_limit
+            return get_meta_page_limit()
+        except Exception:
+            return 100
+
+    def search(self, filters: Optional[dict] = None) -> list[Creator]:
+        """Search Meta Creator Marketplace with filter params. Falls back to mock."""
+        if not self.use_real_api:
+            return self._mock_creators()
+        return self._fetch_from_meta(filters)
+
+    def _fetch_from_meta(self, filters: Optional[dict] = None) -> list[Creator]:
         try:
             from creo.utils.runtime_settings import get_meta_marketplace_key
             from creo.storage.api.meta_config import get_meta_endpoint, get_meta_timeout
             key = get_meta_marketplace_key()
         except (ImportError, OSError, ValueError) as e:
-            import logging; logging.getLogger(__name__).warning('%s fallback: %s', __name__, e)
+            logger.warning("%s fallback: %s", __name__, e)
             return self._mock_creators()
         try:
             import requests
+            params = self._build_params(filters)
+            params["access_token"] = key
             response = requests.get(
                 get_meta_endpoint("creator_marketplace/creators"),
-                params={"access_token": key, "limit": 100},
+                params=params,
                 timeout=get_meta_timeout(),
             )
             if response.status_code == 200:
                 data = response.json()
                 creators = []
                 for i, item in enumerate(data.get("data", [])):
-                    ig_handle = item.get("instagram", {}).get("username", "")
+                    ig = item.get("instagram", {}) or {}
+                    ig_handle = ig.get("username", item.get("username", f"creator_{i}"))
                     creators.append(Creator(
                         id=f"meta_{i}",
                         name=item.get("name", ig_handle or f"Creator {i}"),
@@ -84,10 +131,17 @@ class MetaMarketplaceRepository(BaseApiRepository, CreatorRepository):
                         region=item.get("location", ""),
                         verified=bool(item.get("is_verified", False)),
                         verification_score=70.0,
+                        notes=f"Profile: {item.get('profile_url', ig.get('profile_url', ''))}",
                     ))
                 return creators
+            elif response.status_code == 401:
+                logger.warning("Meta API auth failed (401), falling back to mock")
+            else:
+                logger.warning("Meta API returned %d, falling back to mock", response.status_code)
         except (ImportError, OSError) as e:
-            import logging; logging.getLogger(__name__).warning('%s fetch fallback: %s', __name__, e)
+            logger.warning("%s fetch fallback: %s", __name__, e)
+        except Exception as e:
+            logger.warning("%s unexpected error: %s", __name__, e)
         return self._mock_creators()
 
     def _mock_creators(self) -> list[Creator]:

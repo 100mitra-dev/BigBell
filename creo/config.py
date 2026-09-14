@@ -15,19 +15,23 @@ CUSTOM_LANGUAGES_FILE = SAMPLE_DATA_DIR / "custom_languages.json"
 AI_PROVIDER = os.getenv("AI_PROVIDER", "mock")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-META_API_KEY = os.getenv("META_API_KEY", "")
-META_API_TOKEN = os.getenv("META_API_TOKEN", "")
-META_API_BASE_URL = os.getenv("META_API_BASE_URL", "https://graph.facebook.com/v21.0")
-
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
-
 def _safe_int(name: str, default: int) -> int:
     try:
         return int(os.getenv(name, str(default)))
     except (TypeError, ValueError):
         return default
+
+
+META_API_KEY = os.getenv("META_API_KEY", "")
+META_API_TOKEN = os.getenv("META_API_TOKEN", "")
+META_API_BASE_URL = os.getenv("META_API_BASE_URL", "https://graph.facebook.com")
+META_API_VERSION = os.getenv("META_API_VERSION", "v19.0")
+META_API_TIMEOUT_S = _safe_int("META_API_TIMEOUT_S", 15)
+META_API_PAGE_LIMIT = _safe_int("META_API_PAGE_LIMIT", 100)
+
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 
 
 MATCH_TOP_K = _safe_int("MATCH_TOP_K", 10)
@@ -116,3 +120,20 @@ def save_custom_languages(langs: list[str]):
 
 def get_all_languages() -> list[str]:
     return LANGUAGES + load_custom_languages()
+
+
+CONTENT_TYPES = ["ALL", "REELS", "STORIES", "POSTS", "REELS_STORIES"]
+AUDIENCE_TYPES = ["ALL", "BUSINESS", "PERSONAL"]
+SORT_OPTIONS = ["relevance", "followers", "engagement_rate"]
+PLATFORM_OPTIONS = ["instagram", "facebook", "threads"]
+
+LANGUAGE_CODES: dict[str, str] = {
+    "English": "en", "Hindi": "hi", "Tamil": "ta", "Telugu": "te",
+    "Bengali": "bn", "Marathi": "mr", "Gujarati": "gu", "Kannada": "kn",
+    "Malayalam": "ml", "Punjabi": "pa", "Urdu": "ur", "Bhojpuri": "bho",
+    "Haryanvi": "hi", "Rajasthani": "hi", "Sanskrit": "sa", "Arabic": "ar",
+    "French": "fr",
+}
+
+def lang_to_code(name: str) -> str:
+    return LANGUAGE_CODES.get(name, "")

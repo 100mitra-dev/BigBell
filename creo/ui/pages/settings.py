@@ -141,19 +141,36 @@ try:
         st.subheader("Meta creator discovery API")
         st.caption("Credentials for external Meta creator discovery (Graph API)")
 
-        from creo.utils.runtime_settings import set_meta_api_key, set_meta_api_token
+        from creo.utils.runtime_settings import (
+            set_meta_api_key, set_meta_api_token, set_meta_api_base_url,
+            set_meta_api_version,
+        )
+        from creo.config import META_API_BASE_URL, META_API_VERSION, META_API_TIMEOUT_S, META_API_PAGE_LIMIT
 
         meta_key = st.text_input("Meta API key (app key)", type="password", placeholder="Meta app key...", value=st.session_state.get("meta_api_key", ""))
         meta_token = st.text_input("Meta API token (access token)", type="password", placeholder="EAAB...", value=st.session_state.get("meta_api_token", ""))
 
+        a1, a2 = st.columns(2)
+        with a1:
+            meta_base = st.text_input("Base URL", value=st.session_state.get("meta_api_base_url", "") or META_API_BASE_URL)
+            meta_version = st.text_input("API version", value=st.session_state.get("meta_api_version", "") or META_API_VERSION)
+        with a2:
+            meta_timeout = st.number_input("Request timeout (s)", min_value=1, value=st.session_state.get("meta_api_timeout_s", META_API_TIMEOUT_S))
+            meta_page_limit = st.number_input("Page limit", min_value=1, max_value=1000, value=st.session_state.get("meta_api_page_limit", META_API_PAGE_LIMIT))
+
         if st.button("Save Meta API config", icon=":material/save:"):
             st.session_state.meta_api_key = meta_key
             st.session_state.meta_api_token = meta_token
+            st.session_state.meta_api_base_url = meta_base
+            st.session_state.meta_api_version = meta_version
+            st.session_state.meta_api_timeout_s = meta_timeout
+            st.session_state.meta_api_page_limit = meta_page_limit
             set_meta_api_key(meta_key)
             set_meta_api_token(meta_token)
+            set_meta_api_base_url(meta_base)
+            set_meta_api_version(meta_version)
             persist_config()
             st.success("Meta API config saved and persisted to .env")
-
     with st.container(border=True):
         st.subheader("API integrations")
         st.caption("Configure external API keys for data sources")

@@ -91,9 +91,23 @@ class CreatorService(CachedRepositoryService[Creator]):
         rng = random.Random(seed) if seed is not None else random
         return rng.sample(pending, min(count, len(pending)))
 
+    def search(self, query: str = "") -> list[Creator]:
+        if not query:
+            return self.creators
+        q = query.lower()
+        return [
+            c for c in self.creators if any(q in t for t in (
+                *self._texts(c),
+                (c.region or "").lower(),
+                *self._handles(c),
+            ))
+        ]
+
+    def _handles(self, c: Creator) -> list[str]:
+        return [v.handle.lower() for v in (c.platforms or {}).values()]
+
     def advanced_search(self, query: CreatorSearchQuery) -> PaginatedResult:
         results = self.creators
-
         if query.niche:
             results = [c for c in results if query.niche.lower() in [n.lower() for n in c.niches]]
         if query.language:
