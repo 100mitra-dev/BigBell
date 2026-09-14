@@ -1,9 +1,9 @@
-import json
 from pathlib import Path
 from typing import Optional
 
 from creo.config import SAMPLE_DATA_DIR
 from creo.models import FollowUpNote
+from creo.utils.json_io import save_json
 
 
 class JsonFollowUpNoteRepository:
@@ -11,10 +11,7 @@ class JsonFollowUpNoteRepository:
         self.path: Path = SAMPLE_DATA_DIR / "follow_up_notes.json"
 
     def list_all(self) -> list[FollowUpNote]:
-        if not self.path.exists():
-            return []
-        with open(self.path) as f:
-            return [FollowUpNote(**d) for d in json.load(f)]
+        return [FollowUpNote(**d) for d in load_json("follow_up_notes.json")]
 
     def get_by_id(self, note_id: str) -> Optional[FollowUpNote]:
         for n in self.list_all():
@@ -36,5 +33,4 @@ class JsonFollowUpNoteRepository:
         self.save_all(notes)
 
     def save_all(self, notes: list[FollowUpNote]):
-        with open(self.path, "w") as f:
-            json.dump([n.model_dump() for n in notes], f, indent=2)
+        save_json("follow_up_notes.json", [n.model_dump() for n in notes])

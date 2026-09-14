@@ -19,17 +19,6 @@ class CampaignService(CachedRepositoryService[Campaign]):
     def campaigns(self) -> list[Campaign]:
         return self.items
 
-    def search(self, query: str = "") -> list[Campaign]:
-        if not query:
-            return self.campaigns
-        q = query.lower()
-        return [c for c in self.campaigns if q in c.title.lower() or q in c.brand.lower() or q in c.description.lower()]
-
-    def filter_by_status(self, status: str) -> list[Campaign]:
-        return [c for c in self.campaigns if c.status == status]
-
-    def filter_by_niche(self, niche: str) -> list[Campaign]:
-        return [c for c in self.campaigns if niche.lower() in [n.lower() for n in c.target_niches]]
 
     def get_active_count(self) -> int:
         return len(self.filter_by_status("active"))

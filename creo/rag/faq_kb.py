@@ -163,9 +163,30 @@ class FAQKnowledgeBase:
         self.ensure_seeded()
         return self._get_store()._collection.count()
 
+    def list(self, limit: int = 20, offset: int = 0) -> list[dict]:
+        self.ensure_seeded()
+        limit = max(1, min(int(limit), 100))
+        offset = max(0, int(offset))
+        data = self._get_store()._collection.get(limit=limit, offset=offset)
+        ids = data.get("ids", []) or []
+        docs = data.get("documents", []) or []
+        metas = data.get("metadatas", []) or []
+        items = []
+        for i, doc_id in enumerate(ids):
+            content = docs[i] if i < len(docs) else ""
+            meta = metas[i] if i < len(metas) else None
+            meta = meta or {}
+            items.append({
+                "faq_id": meta.get("id", doc_id),
+                "question": meta.get("question", ""),
+                "category": meta.get("category", ""),
+                "answer": self._answer_from_doc(content or ""),
+            })
+        return items
+
     def categories(self) -> list[str]:
         self.ensure_seeded()
-        metas = self._get_store()._collection.get()["metadatas"]
+        metas = self._get_store()._collection.get(limit=10000)["metadatas"]
         return sorted({m.get("category", "") for m in metas if m})
 
     def search(self, query: str, k: int = 4) -> list[dict]:

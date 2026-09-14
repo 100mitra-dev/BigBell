@@ -82,3 +82,9 @@ class DbFollowUpNote(Base):
     campaign_id: Mapped[str] = mapped_column(sa.String)
     note: Mapped[str] = mapped_column(sa.Text)
     created_at: Mapped[str] = mapped_column(sa.String, default="")
+
+class DbSchemaRevision(Base):
+    __tablename__ = "schema_revisions"
+
+    revision: Mapped[str] = mapped_column(sa.String, primary_key=True)
+    applied_at: Mapped[str] = mapped_column(sa.String, default="")

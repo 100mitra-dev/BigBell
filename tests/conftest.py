@@ -57,9 +57,8 @@ def minimal_creator():
         email="minimal@example.com",
         primary_niche="Fashion",
         primary_language="English",
+        secondary_languages=["Hindi"],
         platforms={},
-        content_quality_score=5.0,
-        profile_completeness=40.0,
         avg_engagement_rate=1.2,
         status=CreatorStatus.PENDING,
     )

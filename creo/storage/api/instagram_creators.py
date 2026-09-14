@@ -1,26 +1,27 @@
+"""BigBell Instagram profile scanning repository — fetches creators by scanning Instagram profiles."""
 import random
 from typing import Optional
 
+from creo.storage.api.base_api import BaseApiRepository
 from creo.storage.base import CreatorRepository
 from creo.models import Creator, CreatorStatus, PlatformInfo
 
 
-class InstagramCreatorRepository(CreatorRepository):
-    """Discovers creators via Instagram profile scanning.
-
-    This adapter is distinct from ``InstagramCampaignRepository`` (which reads a
-    brand's *own* media). This repository scans *public* Instagram profiles to
-    grow the creator pool — extracting handle, follower count, bio, and niche
-    signals from public profile data.
-
-    Uses the Instagram Graph API when a valid access token is configured;
-    otherwise falls back to deterministic mock data.
+class InstagramCreatorRepository(BaseApiRepository, CreatorRepository):
+    """Scans Instagram profiles for creator data using the Instagram Basic Display API
+    or Graph API when a valid access token is configured; falls back to deterministic
+    mock data otherwise.
     """
 
-    @property
-    def use_real_api(self) -> bool:
-        from creo.utils.runtime_settings import get_instagram_key
-        return bool(get_instagram_key())
+    def _check_key(self) -> bool:
+        try:
+            from creo.utils.runtime_settings import get_instagram_key
+            return bool(get_instagram_key())
+        except Exception:
+            return False
+
+    def _mock_data(self) -> list[Creator]:
+        return self._mock_creators()
 
     def list_all(self) -> list[Creator]:
         if self.use_real_api:
@@ -43,64 +44,76 @@ class InstagramCreatorRepository(CreatorRepository):
         raise NotImplementedError("Instagram profile scanning repository is read-only")
 
     def _fetch_from_instagram(self) -> list[Creator]:
-        from creo.utils.runtime_settings import get_instagram_key
-        key = get_instagram_key()
+        try:
+            from creo.utils.runtime_settings import get_instagram_key
+            key = get_instagram_key()
+        except (ImportError, OSError, ValueError) as e:
+            import logging; logging.getLogger(__name__).warning('%s fallback: %s', __name__, e)
+            return self._mock_creators()
         try:
             import requests
             response = requests.get(
-                "https://graph.instagram.com/v19.0/me",
-                params={"fields": "id,username,account_type,followers_count", "access_token": key},
+                "https://graph.instagram.com/me/media",
+                params={"fields": "username,media_count", "access_token": key},
                 timeout=10,
             )
             if response.status_code == 200:
                 data = response.json()
-                # The /me endpoint returns the token owner's profile.
-                # For broader discovery, the Instagram Basic Display API or
-                # oEmbed endpoint can be used to scan public profiles by handle.
+                # Note: Real implementation would need to fetch multiple profiles
+                # This is a placeholder for the API structure
                 creators = []
-                username = data.get("username", "instagram_user")
-                followers = data.get("followers_count", 0)
-                creators.append(Creator(
-                    id=data.get("id", f"ig_0"),
-                    name=username,
-                    email=f"{username}@instagram.com",
-                    primary_niche="Lifestyle",
-                    primary_language="English",
-                    platforms={"instagram": PlatformInfo(handle=username, followers=followers)},
-                    region="India",
-                    status=CreatorStatus.ACTIVE,
-                ))
+                for i, item in enumerate(data.get("data", [])):
+                    creators.append(Creator(
+                        id=f"ig_{i}",
+                        name=item.get("username", f"IG Creator {i}"),
+                        email=f"{item.get('username', 'creator')}@instagram.com",
+                        primary_niche="General",
+                        secondary_niches=[],
+                        primary_language="English",
+                        secondary_languages=[],
+                        platforms={"instagram": PlatformInfo(
+                            handle=f"@{item.get('username', f'creator{i}')}",
+                            followers=int(item.get("followers_count", 0)),
+                            verified=False,
+                        )},
+                        content_quality_score=0.0,
+                        profile_completeness=60.0,
+                        avg_engagement_rate=0.0,
+                        status=CreatorStatus.ACTIVE,
+                        region="",
+                        verified=False,
+                        verification_score=0.0,
+                    ))
                 return creators
-        except Exception:
-            pass
+        except (ImportError, OSError) as e:
+            import logging; logging.getLogger(__name__).warning('%s fetch fallback: %s', __name__, e)
         return self._mock_creators()
 
     def _mock_creators(self) -> list[Creator]:
         mock_creators = [
             ("Neha Malhotra", "Beauty & Makeup", "English", "Mumbai", "@nehamalhotra", 340000, True),
             ("Delhi Food Walks", "Food & Cooking", "Hindi", "Delhi", "@delhifoodwalks", 190000, True),
-            ("Arjun Codes", "Technology", "English", "Bangalore", "@arjuncodes", 85000, False),
-            ("Tina's Travelogue", "Travel", "English", "Goa", "@tinatravels", 150000, False),
-            ("FitnessByRaj", "Fitness & Wellness", "Hindi", "Mumbai", "@fitnessbyraj", 65000, True),
-            ("ComedyMumbai", "Comedy & Entertainment", "Hindi", "Mumbai", "@comedymumbai", 780000, True),
-            ("ArtByPooja", "Photography", "English", "Delhi", "@artbypooja", 55000, False),
-            ("BookSnob", "Book Reviews & Literature", "English", "Bangalore", "@booksnob", 42000, True),
+            ("Mumbai Traveler", "Travel", "English", "Mumbai", "@mumbaitraveler", 85000, False),
+            ("Bengaluru Coder", "Technology", "English", "Bangalore", "@blrcoder", 67000, True),
+            ("Chennai Dancer", "Dance & Choreography", "Tamil", "Chennai", "@chennaidancer", 45000, False),
         ]
         creators = []
         for i, (name, niche, lang, region, handle, followers, verified) in enumerate(mock_creators):
             creators.append(Creator(
                 id=f"ig_{i}",
                 name=name,
-                email=f"{handle.replace('@', '')}@instagram.com",
+                email=f"{handle[1:]}@instagram.com",
                 primary_niche=niche,
+                secondary_niches=[],
                 primary_language=lang,
+                secondary_languages=[],
                 platforms={"instagram": PlatformInfo(handle=handle, followers=followers, verified=verified)},
-                region=region,
-                content_quality_score=round(random.uniform(5.5, 8.8), 1),
-                profile_completeness=round(random.uniform(60, 95), 1),
-                avg_engagement_rate=round(random.uniform(1.0, 9.5), 1),
-                total_campaigns_completed=random.randint(0, 25),
-                total_earnings=round(random.uniform(20000, 600000), -3),
+                content_quality_score=0.0,
+                profile_completeness=60.0,
+                avg_engagement_rate=random.uniform(2.0, 5.0),
                 status=CreatorStatus.ACTIVE,
+                region=region,
+                verified=verified,
+                verification_score=40.0,
             ))
         return creators

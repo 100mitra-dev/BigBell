@@ -1,8 +1,8 @@
 # ─────────────────────────────────────────────────────────────
-# Creo — Creator Success AI Platform
-# Instant deployment:  docker build -t creo . && docker run -p 8501:8501 creo
+# BigBell — Creator Success AI Platform
+# Instant deployment:  docker build -t bigbell . && docker run -p 8501:8501 -v bigbell-data:/app/data bigbell
 # ─────────────────────────────────────────────────────────────
-FROM python:3.14-slim
+FROM python:3.12-slim
 
 # Fail fast on missing build context files / broken deps
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -21,14 +21,15 @@ RUN apt-get update \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application
+# Copy the application (includes sample data in data/sample_data/)
 COPY . .
 
 # App entry point
 EXPOSE 8501
 
-# Persist runtime data (chat history, uploaded FAQs, Chroma vector store)
-VOLUME ["/app/data"]
+# NOTE: Do NOT use VOLUME here — it masks the COPYed sample data.
+# Mount a named volume at runtime if you want persistence:
+#   docker run -v bigbell-data:/app/data ...
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=5)"

@@ -1,20 +1,16 @@
-import json
 from pathlib import Path
 from typing import Optional
 
 from creo.config import SAMPLE_DATA_DIR
 from creo.models import CampaignAssignment
-
+from creo.utils.json_io import load_json, save_json
 
 class JsonAssignmentRepository:
     def __init__(self):
         self.path: Path = SAMPLE_DATA_DIR / "assignments.json"
 
     def list_all(self) -> list[CampaignAssignment]:
-        if not self.path.exists():
-            return []
-        with open(self.path) as f:
-            return [CampaignAssignment(**d) for d in json.load(f)]
+        return [CampaignAssignment(**d) for d in load_json("assignments.json")]
 
     def get_by_id(self, assignment_id: str) -> Optional[CampaignAssignment]:
         for a in self.list_all():
@@ -39,6 +35,4 @@ class JsonAssignmentRepository:
         self.save_all(items)
 
     def save_all(self, assignments: list[CampaignAssignment]):
-        Path(self.path.parent).mkdir(parents=True, exist_ok=True)
-        with open(self.path, "w") as f:
-            json.dump([a.model_dump(mode="json") for a in assignments], f, indent=2)
+        save_json("assignments.json", [a.model_dump(mode="json") for a in assignments])

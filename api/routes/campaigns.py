@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 
 from creo.services.campaign_service import CampaignService
-from creo.services.creator_service import CreatorService, CreatorSearchQuery
+from creo.services.creator_service import CreatorService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

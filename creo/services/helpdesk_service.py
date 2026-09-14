@@ -13,6 +13,17 @@ logger = logging.getLogger(__name__)
 CHAT_HISTORY_FILE = "chat_history.json"
 CHANNELS = ["whatsapp", "email", "in_app"]
 
+CHANNEL_META = {
+    "whatsapp": (":material/call:", "WhatsApp"),
+    "email": (":material/mail:", "Email"),
+    "in_app": (":material/chat:", "In-app"),
+}
+CONFIDENCE_META = {
+    "high": (":material/check_circle:", "High confidence"),
+    "medium": (":material/timeline:", "Medium confidence"),
+    "low": (":material/error:", "Low confidence"),
+}
+
 DEMO_QUESTIONS = [
     "How do I apply for a campaign?",
     "When will I receive my payment?",
@@ -20,6 +31,38 @@ DEMO_QUESTIONS = [
     "How many followers do I need to join?",
     "What happens if I miss a deadline?",
 ]
+
+
+def channel_tag(channel: str) -> str:
+    icon, label = CHANNEL_META.get(channel, (":material/chat:", (channel or "").title()))
+    return f"{icon} {label}"
+
+
+def message_caption(msg) -> str:
+    icon, label = CHANNEL_META.get(getattr(msg, "channel", ""), (":material/chat:", (getattr(msg, "channel", "") or "").title()))
+    return f"{icon} {label} \u00b7 {getattr(msg, 'created_at', '')[11:16]}"
+
+
+def confidence_tag(confidence: str | None) -> str:
+    icon, label = CONFIDENCE_META.get(confidence or "medium", CONFIDENCE_META["medium"])
+    return f"{icon} {label}"
+
+
+def creator_label_for(creator_id: str, get_by_id) -> str:
+    creator = get_by_id(creator_id)
+    if not creator:
+        return creator_id
+    return f"{creator.name} \u00b7 {creator.primary_niche}"
+
+
+def resolve_thread_id(selected: str | None, picked: str | None, thread_ids: list[str],
+                       creators: list, get_by_id) -> str | None:
+    for candidate in (selected, picked):
+        if candidate and (get_by_id(candidate) or candidate in thread_ids):
+            return candidate
+    if thread_ids:
+        return thread_ids[0]
+    return creators[0].id if creators else None
 
 
 class HelpdeskService:

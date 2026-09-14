@@ -10,23 +10,17 @@ from creo.services.helpdesk_service import (
     HelpdeskService,
     DEMO_QUESTIONS,
     CHANNELS,
+    channel_tag,
+    message_caption,
+    confidence_tag,
+    creator_label_for,
+    resolve_thread_id,
 )
 from creo.utils.json_io import load_faqs, load_json
 from creo.services.creator_service import CreatorService
 import logging
 
 logger = logging.getLogger(__name__)
-
-CHANNEL_META = {
-    "whatsapp": (":material/call:", "WhatsApp"),
-    "email": (":material/mail:", "Email"),
-    "in_app": (":material/chat:", "In-app"),
-}
-CONFIDENCE_META = {
-    "high": (":material/check_circle:", "High confidence"),
-    "medium": (":material/timeline:", "Medium confidence"),
-    "low": (":material/error:", "Low confidence"),
-}
 
 if "cs" not in st.session_state:
     st.session_state.cs = CreatorService()
@@ -37,20 +31,18 @@ svc = st.session_state.helpdesk
 
 
 def creator_label(creator_id: str) -> str:
-    creator = cs.get_by_id(creator_id)
-    if not creator:
-        return creator_id
-    return f"{creator.name} \u00b7 {creator.primary_niche}"
+    return creator_label_for(creator_id, cs.get_by_id)
 
 
-def channel_tag(channel: str) -> str:
-    icon, label = CHANNEL_META.get(channel, (":material/chat:", channel.title()))
-    return f"{icon} {label}"
 
-
-def message_caption(msg) -> str:
-    icon, label = CHANNEL_META.get(msg.channel, (":material/chat:", msg.channel.title()))
-    return f"{icon} {label} \u00b7 {msg.created_at[11:16]}"
+def current_thread_id() -> str | None:
+    return resolve_thread_id(
+        st.session_state.get("selected_thread"),
+        st.session_state.get("thread_picker"),
+        svc.creator_ids(),
+        cs.creators,
+        cs.get_by_id,
+    )
 
 
 def get_suggestions(pending_msg) -> list[str]:
@@ -60,20 +52,6 @@ def get_suggestions(pending_msg) -> list[str]:
         with st.spinner("Drafting AI reply suggestions..."):
             cache[key] = svc.suggest_replies(pending_msg.content, count=3)
     return cache[key]
-
-
-def current_thread_id() -> str | None:
-    selected = st.session_state.get("selected_thread")
-    if selected and (cs.get_by_id(selected) or selected in svc.creator_ids()):
-        return selected
-    picked = st.session_state.get("thread_picker")
-    if picked and (cs.get_by_id(picked) or picked in svc.creator_ids()):
-        return picked
-    thread_ids = svc.creator_ids()
-    if thread_ids:
-        return thread_ids[0]
-    creators = cs.creators
-    return creators[0].id if creators else None
 
 
 def on_thread_picked():
@@ -187,10 +165,9 @@ with inbox_tab:
                         with st.chat_message("assistant"):
                             st.markdown(msg.content)
                             if msg.kind == "auto":
-                                icon, label = CONFIDENCE_META.get(msg.confidence, CONFIDENCE_META["medium"])
                                 st.markdown(
                                     f":material/bolt: **Auto-answered** \u00b7 "
-                                    f"`{msg.faq_id or 'FAQ'}` \u00b7 {icon} {label}",
+                                    f"`{msg.faq_id or 'FAQ'}` \u00b7 {confidence_tag(msg.confidence)}",
                                     help="Answered automatically from the FAQ knowledge base via embedding similarity.",
                                 )
                             else:

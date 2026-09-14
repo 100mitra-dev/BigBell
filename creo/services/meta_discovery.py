@@ -99,7 +99,7 @@ def live_discover(f: DiscoveryFilters, api_key: str = "", api_token: str = "") -
     for item in data:
         results.append(DiscoveredCreator(
             name=item.get("name", item.get("username", "Unknown")),
-            handle="@ spont" + item.get("username", ""),
+            handle="@" + item.get("username", ""),
             niche=f.niche or item.get("category", "General"),
             language=f.language or "English",
             region=f.region or "",

@@ -17,6 +17,9 @@ class VectorStoreManager:
         return cls._instance
 
     def reset(self):
+        import os
+        if os.getenv("BIGBELL_ALLOW_RESET") != "1":
+            raise RuntimeError("Vector store reset requires BIGBELL_ALLOW_RESET=1")
         self._vector_store = None
         if VECTOR_STORE_DIR.exists():
             import shutil

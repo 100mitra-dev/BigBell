@@ -1,10 +1,16 @@
+from functools import lru_cache
+
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 from creo.agents.query import QueryAgent
 
 router = APIRouter()
-agent = QueryAgent()
+
+
+@lru_cache(maxsize=1)
+def get_qa() -> QueryAgent:
+    return QueryAgent()
 
 
 class FAQResponse(BaseModel):
@@ -15,7 +21,7 @@ class FAQResponse(BaseModel):
 
 @router.get("/ask", response_model=FAQResponse)
 def ask_faq(question: str = Query(..., description="The creator's question"), category: str = Query(None, description="Optional category filter")):
-    result = agent.answer(question, category=category)
+    result = get_qa().answer(question, category=category)
     return FAQResponse(**result)
 
 

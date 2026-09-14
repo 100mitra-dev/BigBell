@@ -17,6 +17,15 @@ from creo.storage.base import CreatorRepository
 
 logger = logging.getLogger(__name__)
 
+_READ_ONLY_TYPES = frozenset({
+    "MetaMarketplaceRepository",
+    "ModashCreatorRepository",
+    "InstagramCreatorRepository",
+    "YouTubeCreatorRepository",
+    "InstagramCampaignRepository",
+    "WhatsAppPaymentRepository",
+})
+
 
 def _fingerprint(c: Creator) -> str:
     handle = ""
@@ -86,8 +95,13 @@ class HybridCreatorRepository(CreatorRepository):
 
     def _find_db_source(self) -> CreatorRepository | None:
         for s in self._sources:
-            if type(s).__name__ == "DbCreatorRepository":
+            if getattr(s, "_is_writable", None) is True:
                 return s
+            if getattr(s, "_is_writable", None) is False:
+                continue
+            if type(s).__name__ in _READ_ONLY_TYPES:
+                continue
+            return s
         return None
 
     @property
@@ -139,10 +153,17 @@ class HybridCreatorRepository(CreatorRepository):
         if self._db is not None:
             return self._db
         for s in self._sources:
-            try:
+            # Skip read-only API sources; only True for JSON/DB-backed repos.
+            write_marker = getattr(s, "_is_writable", None)
+            if write_marker is True:
                 return s
-            except Exception:
+            if write_marker is False:
                 continue
+            # Fallback for legacy sources without the marker: skip known read-only
+            # API repo classes by declaring them in _READ_ONLY_TYPES.
+            if type(s).__name__ in _READ_ONLY_TYPES:
+                continue
+            return s
         raise NotImplementedError("No writable creator source available")
 
     def add(self, creator: Creator):
@@ -158,9 +179,10 @@ class HybridCreatorRepository(CreatorRepository):
         """Pull every non-DB source and upsert the merged pool into SQLite."""
         if self._db is None:
             return {"synced": 0, "status": "no-db-source"}
+        # Capture existing IDs BEFORE list_all() triggers auto-seeding
+        existing = {c.id for c in self._db.list_all()}
         merged = self.list_all()
         try:
-            existing = {c.id for c in self._db.list_all()}
             fresh = [c for c in merged if c.id not in existing]
             combined = self._db.list_all() + fresh
             # Re-merge by fingerprint to avoid duplicates on repeat syncs.

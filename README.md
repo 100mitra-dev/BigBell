@@ -26,6 +26,15 @@ For real semantic search (FAQ chatbot), install sentence-transformers:
 pip install sentence-transformers
 ```
 
+## Environment variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `AI_PROVIDER` | `mock` | `mock` \| `openai` \| `gemini` |
+| `OPENAI_API_KEY` / `GEMINI_API_KEY` | — | Real LLM providers |
+| `ALLOWED_ORIGINS` | `http://localhost:8501,http://127.0.0.1:8501` | API CORS allowlist |
+| `RATE_LIMIT_REQUESTS` / `RATE_LIMIT_WINDOW` | `100` / `60` | API rate limit (reqs per seconds) |
+
 ## Project structure
 
 ```
@@ -84,3 +93,13 @@ creo/ (core library)   →  creo/agents/ (AI agents)
 ```
 
 The `creo/` core layer (agents, services, storage, utils) has no Streamlit dependency — it can be used independently.
+
+## Docker & backup
+
+```bash
+docker build -t bigbell .
+docker run -p 8501:8501 -v bigbell-data:/app/data bigbell
+```
+
+Back up the `data/` directory (SQLite DB, JSON sample data, ChromaDB store) before upgrades:
+`tar -czf backup-$(date +%F).tar.gz data/`.

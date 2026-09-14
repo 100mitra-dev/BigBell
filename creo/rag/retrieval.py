@@ -1,35 +1,16 @@
-from creo.rag.vector_store import VectorStoreManager
-from creo.rag.document_loader import load_faq_documents
+import logging
+
+from creo.rag.faq_kb import FAQKnowledgeBase
+
+logger = logging.getLogger(__name__)
 
 
-class FAQRetriever:
-    def __init__(self):
-        self._initialized = False
-        self.vs_manager = VectorStoreManager()
-
-    def initialize(self):
-        if not self._initialized:
-            store = self.vs_manager.get_vector_store()
-            if store._collection.count() == 0:
-                docs = load_faq_documents()
-                if docs:
-                    self.vs_manager.add_documents(docs)
-            self._initialized = True
-
-    def search(self, query: str, k: int = 5) -> list:
-        try:
-            self.initialize()
-            retriever = self.vs_manager.get_retriever(k=k)
-            return retriever.invoke(query)
-        except Exception:
-            return []
+class FAQRetriever(FAQKnowledgeBase):
+    """Back-compat alias: the FAQ knowledge base is the sole retrieval facade."""
 
     def search_by_category(self, query: str, category: str, k: int = 5) -> list:
         try:
-            self.initialize()
-            store = self.vs_manager.get_vector_store()
-            return store.similarity_search(
-                query, k=k, filter={"category": category}
-            )
-        except Exception:
+            return [h for h in self.search(query, k=max(k * 3, k)) if h.get("category") == category][:k]
+        except (ValueError, RuntimeError, OSError) as exc:
+            logger.warning("FAQRetriever.search_by_category failed: %s", exc)
             return []

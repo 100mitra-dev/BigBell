@@ -6,12 +6,13 @@ from creo.services.creator_service import CreatorSearchQuery, CreatorService
 
 
 def _c(id, name, niche, lang, region, followers, eng, tier_plain=False, **kw):
-    plats = kw.pop("platforms", {"instagram": PlatformInfo(handle="@" + id, followers=followers, verified=kw.pop("verified", False))})
+    verified = kw.pop("verified", False)
+    plats = kw.pop("platforms", {"instagram": PlatformInfo(handle="@" + id, followers=followers, verified=verified)})
     return Creator(
         id=id, name=name, email=f"{id}@test.com",
         primary_niche=niche, primary_language=lang,
         platforms=plats, avg_engagement_rate=eng,
-        region=region, status=kw.pop("status", CreatorStatus.ACTIVE), **kw,
+        region=region, status=kw.pop("status", CreatorStatus.ACTIVE), verified=verified, **kw,
     )
 
 

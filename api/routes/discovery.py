@@ -5,12 +5,22 @@ GET /api/v1/discovery/status  -> source availability (no secrets echoed)
 POST /api/v1/discovery/sync   -> pull external discovery into the SQLite cache
 """
 import logging
-
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+def verify_admin_key(x_admin_key: str = Header(None)) -> str:
+    """Verify admin API key from header. In production, use proper auth (JWT, OAuth, etc.)."""
+    from creo.utils.runtime_settings import get_admin_key
+    expected = get_admin_key()
+    if not expected:
+        raise HTTPException(status_code=503, detail="Admin key not configured on server")
+    if x_admin_key != expected:
+        raise HTTPException(status_code=401, detail="Invalid admin key")
+    return x_admin_key
 
 
 class DiscoveryConfigUpdate(BaseModel):
@@ -32,7 +42,7 @@ def discovery_status():
 
 
 @router.put("/config")
-def update_discovery_config(update: DiscoveryConfigUpdate):
+def update_discovery_config(update: DiscoveryConfigUpdate, _: str = Depends(verify_admin_key)):
     from creo.utils import runtime_settings as rs
 
     applied: list[str] = []
@@ -74,10 +84,11 @@ def update_discovery_config(update: DiscoveryConfigUpdate):
 
 
 @router.post("/sync")
-def sync_discovery():
+def sync_discovery(_: str = Depends(verify_admin_key)):
     from creo.storage.factories import get_creator_repo
     repo = get_creator_repo()
     sync = getattr(repo, "sync_external_to_db", None)
     if sync is None:
         return {"synced": 0, "status": "repo does not support sync"}
     return sync()
+

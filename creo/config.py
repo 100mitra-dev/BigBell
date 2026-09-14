@@ -23,8 +23,15 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 
-MATCH_TOP_K = int(os.getenv("MATCH_TOP_K", "10"))
-MATCH_RERANK_TOP_K = int(os.getenv("MATCH_RERANK_TOP_K", "5"))
+def _safe_int(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+MATCH_TOP_K = _safe_int("MATCH_TOP_K", 10)
+MATCH_RERANK_TOP_K = _safe_int("MATCH_RERANK_TOP_K", 5)
 
 REVIEW_NICHE_WEIGHT = 0.35
 REVIEW_QUALITY_WEIGHT = 0.25

@@ -144,9 +144,11 @@ def test_facets_detail_and_404(monkeypatch):
 def test_discovery_status_sync_and_config(monkeypatch):
     from creo.utils import runtime_settings as rs
     monkeypatch.setattr(rs, "persist_config", lambda: True)  # no disk writes in tests
+    monkeypatch.setenv("ADMIN_KEY", "test-admin-key-123")
+    rs.update_from_env()
     client = _client(monkeypatch)
     assert "meta" in client.get("/api/v1/discovery/status").json()
-    r = client.put("/api/v1/discovery/config", json={"meta_marketplace_key": "tok123", "meta_api_version": "v19.0"})
+    r = client.put("/api/v1/discovery/config", json={"meta_marketplace_key": "tok123", "meta_api_version": "v19.0"}, headers={"X-Admin-Key": "test-admin-key-123"})
     assert r.status_code == 200 and "meta_marketplace_key" in r.json()["applied"]
     assert r.json()["persisted"] is True
     rs._RUNTIME_CONFIG.pop("meta_marketplace_key", None)

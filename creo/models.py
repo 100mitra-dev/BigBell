@@ -41,6 +41,7 @@ class Creator(BaseModel):
     verified_at: Optional[str] = None
     suggested_tags: list[str] = []
     classified_at: Optional[str] = None
+    region: Optional[str] = None
 
     @property
     def total_followers(self) -> int:
@@ -55,6 +56,11 @@ class Creator(BaseModel):
         return len(self.platforms)
 
     @property
+    def handles(self) -> dict[str, str]:
+        """Platform -> handle mapping."""
+        return {k: v.handle for k, v in self.platforms.items()}
+
+    @property
     def tier(self) -> str:
         total = self.total_followers
         if total >= 500_000:
@@ -64,7 +70,45 @@ class Creator(BaseModel):
         elif total >= 10_000:
             return "Growth"
         return "Rising"
+    @property
+    def niches(self) -> list[str]:
+        """All niches (primary + secondary) for matching."""
+        return [self.primary_niche] + self.secondary_niches
 
+    @property
+    def languages(self) -> list[str]:
+        """All languages (primary + secondary) for matching."""
+        return [self.primary_language] + self.secondary_languages
+
+    def to_card_dict(self) -> dict:
+        """Compact card payload used by API + UI discovery."""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "primary_niche": self.primary_niche,
+            "secondary_niches": self.secondary_niches,
+            "niches": self.niches,
+            "primary_language": self.primary_language,
+            "secondary_languages": self.secondary_languages,
+            "languages": self.languages,
+            "region": self.region,
+            "regions": [self.region] if self.region else [],
+            "display_region": self.region or "",
+            "total_followers": self.total_followers,
+            "total_subscribers": self.total_followers,  # alias for total_followers
+            "avg_engagement_rate": self.avg_engagement_rate,
+            "content_quality_score": self.content_quality_score,
+            "profile_completeness": self.profile_completeness,
+            "status": self.status.value if hasattr(self.status, "value") else self.status,
+            "tier": self.tier,
+            "verified": self.verified,
+            "verification_score": self.verification_score,
+            "engagement_rate": self.avg_engagement_rate,
+            "platforms": {k: {"handle": v.handle, "followers": v.followers, "verified": v.verified} for k, v in self.platforms.items()},
+            "handles": {k: v.handle for k, v in self.platforms.items()},
+            "followers_by_platform": {k: v.followers for k, v in self.platforms.items()},
+        }
 
 class Campaign(BaseModel):
     id: str

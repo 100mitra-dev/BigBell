@@ -1,4 +1,4 @@
-streamlit>=1.35.0
+streamlit>=1.46.0
 langchain>=0.3.0
 langchain-community>=0.3.0
 langchain-openai>=0.2.0
@@ -8,7 +8,9 @@ pydantic>=2.0.0
 pandas>=2.0.0
 python-dotenv>=1.0.0
 langchain-chroma>=1.1.0
-# Install for real embeddings without API keys:
-# sentence-transformers>=3.0.0
 pypdf>=5.0.0
 reportlab>=4.0.0
+sqlalchemy>=2.0.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
+onnxruntime>=1.18.0
