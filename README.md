@@ -1,4 +1,4 @@
-# Creo — Creator Success AI Platform
+# BigBell — Creator Success AI Platform
 
 AI-powered platform for creator onboarding, management, and campaign operations.
 
