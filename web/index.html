@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BigBell — Creator Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="bell" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 19a2.2 2.2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17.2" cy="6.2" r="2.1" fill="currentColor"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">BigBell</div>
+      <div class="brand-sub">Creator Discovery &amp; Campaign Platform</div>
+    </div>
+  </div>
+
+  <div class="searchwrap">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="q" type="search" placeholder="Search creators, niches, handles, regions…" autocomplete="off" />
+    <kbd>/</kbd>
+  </div>
+
+  <div class="top-actions">
+    <div id="statusPill" class="pill" title="Discovery status">● connecting…</div>
+    <button id="keysBtn" class="btn solid">Connect providers</button>
+  </div>
+</header>
+
+<div class="sourcerow">
+  <div class="seg" role="tablist" aria-label="Data source">
+    <button data-source="all" class="on">All sources</button>
+    <button data-source="local">Database</button>
+    <button data-source="meta">Meta Marketplace</button>
+    <button data-source="modash">Modash</button>
+  </div>
+  <div class="source-actions">
+    <button id="csvBtn" class="btn ghost small">Export CSV</button>
+    <button id="jsonBtn" class="btn ghost small">Export JSON</button>
+    <button id="syncBtn" class="btn ghost small" title="Pull Meta / Modash discovery into the local database">Sync DB</button>
+  </div>
+  <div id="resultMeta" class="resultmeta">—</div>
+</div>
+
+<nav class="viewtabs" role="tablist" aria-label="Views">
+  <button id="tabSearch" class="on" data-view="search">Creator Search</button>
+  <button id="tabCampaigns" data-view="campaigns">Campaigns</button>
+  <button id="tabMessages" data-view="messages">Messages</button>
+</nav>
+
+<main class="layout">
+  <aside class="filters">
+    <div class="f-head">
+      <h2>Refine</h2>
+      <button id="clearBtn" class="link">Clear all</button>
+    </div>
+    <label class="f">Niche
+      <select id="fNiche"><option value="">All niches</option></select>
+    </label>
+    <label class="f">Language
+      <select id="fLang"><option value="">All languages</option></select>
+    </label>
+    <label class="f">Region
+      <select id="fRegion"><option value="">All regions</option></select>
+    </label>
+    <div class="frow">
+      <label class="f">Tier
+        <select id="fTier">
+          <option value="">Any tier</option>
+          <option>Elite</option><option>Pro</option>
+          <option>Growth</option><option>Rising</option>
+        </select>
+      </label>
+      <label class="f">Platform
+        <select id="fPlatform"><option value="">Any</option></select>
+      </label>
+    </div>
+    <div class="frow">
+      <label class="f">Status
+        <select id="fStatus">
+          <option value="">Any</option>
+          <option value="active">Active</option>
+          <option value="onboarding">Onboarding</option>
+          <option value="pending">Pending</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </label>
+      <label class="f">Sort by
+        <select id="fSort">
+          <option value="followers">Followers</option>
+          <option value="engagement">Engagement</option>
+          <option value="quality">Quality</option>
+          <option value="name">Name</option>
+          <option value="earnings">Earnings</option>
+        </select>
+      </label>
+    </div>
+    <label class="f">Min followers <output id="oFollowers">0</output>
+      <input id="fMinF" type="range" min="0" max="500000" step="5000" value="0" />
+    </label>
+    <label class="f">Min engagement <output id="oEng">0%</output>
+      <input id="fMinE" type="range" min="0" max="10" step="0.5" value="0" />
+    </label>
+    <label class="check"><input id="fVerified" type="checkbox" /><span>Verified only</span></label>
+  </aside>
+
+  <section class="results">
+    <div class="viewbar">
+      <button id="gridView" class="viewbtn on" data-view="grid">▦ Grid</button>
+      <button id="listView" class="viewbtn" data-view="list">☰ List</button>
+    </div>
+    <div id="activeChips" class="chips"></div>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" hidden>
+      <h3>No creators match those filters</h3>
+      <p>Loosen a filter or sync the database with Meta / Modash discovery.</p>
+    </div>
+    <div id="error" class="empty error" hidden>
+      <h3>Couldn’t reach the BigBell API</h3>
+      <p>Start it with <code>uvicorn api.main:app --reload</code> then retry.</p>
+      <button id="retryBtn" class="btn solid">Retry</button>
+    </div>
+    <nav class="pager">
+      <button id="prevBtn" class="btn ghost">← Prev</button>
+      <span id="pageInfo">Page 1</span>
+      <button id="nextBtn" class="btn ghost">Next →</button>
+    </nav>
+  </section>
+</main>
+
+<section id="campaignsView" class="panelview" hidden>
+  <div id="campaignList" class="camplist"></div>
+  <div id="campaignDetail" class="campdetail" hidden></div>
+</section>
+
+<section id="messagesView" class="panelview" hidden>
+  <div class="chatbox">
+    <div id="chatLog" class="chatlog"></div>
+    <form id="chatForm" class="chatform">
+      <input id="chatInput" type="text" placeholder="Ask about payouts, onboarding, verification…" autocomplete="off" />
+      <button class="btn solid" type="submit">Ask</button>
+    </form>
+  </div>
+</section>
+
+<dialog id="detail"></dialog>
+
+<dialog id="keysModal" class="keys">
+  <form method="dialog">
+    <h3>Connect discovery providers</h3>
+    <p class="muted">Keys are stored in <code>.env</code> on this machine and never displayed back.</p>
+    <label>Meta Marketplace token
+      <input id="kMeta" type="password" placeholder="Meta access token" autocomplete="off" />
+    </label>
+    <label>Modash API key
+      <input id="kModash" type="password" placeholder="Modash key" autocomplete="off" />
+    </label>
+    <label>Meta Graph base URL
+      <input id="kBase" type="text" value="https://graph.facebook.com" />
+    </label>
+    <div class="mrow">
+      <button value="cancel" class="btn ghost">Cancel</button>
+      <button id="kSave" value="save" class="btn solid">Save keys</button>
+    </div>
+    <p id="kMsg" class="muted"></p>
+  </form>
+</dialog>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

@@ -138,6 +138,23 @@ try:
             st.rerun()
 
     with st.container(border=True):
+        st.subheader("Meta creator discovery API")
+        st.caption("Credentials for external Meta creator discovery (Graph API)")
+
+        from creo.utils.runtime_settings import set_meta_api_key, set_meta_api_token
+
+        meta_key = st.text_input("Meta API key (app key)", type="password", placeholder="Meta app key...", value=st.session_state.get("meta_api_key", ""))
+        meta_token = st.text_input("Meta API token (access token)", type="password", placeholder="EAAB...", value=st.session_state.get("meta_api_token", ""))
+
+        if st.button("Save Meta API config", icon=":material/save:"):
+            st.session_state.meta_api_key = meta_key
+            st.session_state.meta_api_token = meta_token
+            set_meta_api_key(meta_key)
+            set_meta_api_token(meta_token)
+            persist_config()
+            st.success("Meta API config saved and persisted to .env")
+
+    with st.container(border=True):
         st.subheader("API integrations")
         st.caption("Configure external API keys for data sources")
 
@@ -246,9 +263,9 @@ try:
                     st.error("git not found — cannot reset")
 
     with st.container(border=True):
-        st.subheader("About Creo")
+        st.subheader("About BigBell")
         st.markdown("""
-        **Creo** is an AI-powered platform for creator onboarding, management, and campaign operations.
+        **BigBell** is an AI-powered platform for creator onboarding, management, and campaign operations.
 
         - **Mock mode** — fully functional with simulated AI responses
         - **OpenAI** — configurable model selection (default: latest available)

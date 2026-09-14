@@ -1,7 +1,7 @@
 [project]
-name = "creo"
+name = "bigbell"
 version = "2.0.0"
-description = "Creator Success AI Platform - AI-powered creator onboarding and management"
+description = "BigBell Creator Success AI Platform - AI-powered creator onboarding and management"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

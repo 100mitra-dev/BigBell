@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Creo — Creator Success Platform",
+    page_title="BigBell — Creator Success Platform",
     page_icon=":material/rocket_launch:",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -48,6 +48,7 @@ page = st.navigation({
         st.Page("creo/ui/pages/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
     ],
     "Creators": [
+        st.Page("creo/ui/pages/discovery.py", title="Discover Creators", icon=":material/travel_explore:"),
         st.Page("creo/ui/pages/creators.py", title="All Creators", icon=":material/group:"),
         st.Page("creo/ui/pages/add_creator.py", title="Add Creator with AI", icon=":material/person_add:"),
         st.Page("creo/ui/pages/creator_validation.py", title="Review & Classify", icon=":material/verified:"),

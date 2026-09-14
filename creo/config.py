@@ -15,6 +15,9 @@ CUSTOM_LANGUAGES_FILE = SAMPLE_DATA_DIR / "custom_languages.json"
 AI_PROVIDER = os.getenv("AI_PROVIDER", "mock")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+META_API_KEY = os.getenv("META_API_KEY", "")
+META_API_TOKEN = os.getenv("META_API_TOKEN", "")
+META_API_BASE_URL = os.getenv("META_API_BASE_URL", "https://graph.facebook.com/v21.0")
 
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")

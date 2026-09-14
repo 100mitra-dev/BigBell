@@ -4,8 +4,14 @@ CONFIG_DEFAULTS = {
     "provider": "mock",
     "openai_key": "",
     "gemini_key": "",
+    "meta_api_key": "",
+    "meta_api_token": "",
     "openai_model": "gpt-4o",
     "gemini_model": "gemini-3.5-flash-lite",
+    "youtube_key": "",
+    "instagram_key": "",
+    "whatsapp_key": "",
+    "data_source": "json",
     "debug_logging": False,
 }
 

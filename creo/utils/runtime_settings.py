@@ -2,12 +2,14 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv, set_key
 
-from creo.config import AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_KEY, ENV_PATH
+from creo.config import AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_KEY, META_API_KEY, META_API_TOKEN, ENV_PATH
 
 _RUNTIME_CONFIG = {
     "provider": AI_PROVIDER,
     "openai_key": OPENAI_API_KEY,
     "gemini_key": GEMINI_API_KEY,
+    "meta_api_key": META_API_KEY,
+    "meta_api_token": META_API_TOKEN,
     "openai_model": "gpt-4o",
     "gemini_model": "gemini-3.5-flash-lite",
     "youtube_key": "",
@@ -21,6 +23,8 @@ _ENV_MAP = {
     "provider": "AI_PROVIDER",
     "openai_key": "OPENAI_API_KEY",
     "gemini_key": "GEMINI_API_KEY",
+    "meta_api_key": "META_API_KEY",
+    "meta_api_token": "META_API_TOKEN",
     "openai_model": "OPENAI_MODEL",
     "gemini_model": "GEMINI_MODEL",
     "youtube_key": "YOUTUBE_API_KEY",
@@ -99,6 +103,31 @@ def set_whatsapp_key(key: str):
     _RUNTIME_CONFIG["whatsapp_key"] = key
 
 
+def get_meta_api_key() -> str:
+    key = _RUNTIME_CONFIG.get("meta_api_key", "")
+    if not key:
+        import os as _os
+        key = _os.getenv("META_MARKETPLACE_API_KEY", "") or _os.getenv("MODASH_API_KEY", "")
+    return key
+
+
+def set_meta_api_key(key: str):
+    _RUNTIME_CONFIG["meta_api_key"] = key
+    key = _RUNTIME_CONFIG.get("meta_api_key", "")
+    if not key:
+        import os as _os
+        key = _os.getenv("META_MARKETPLACE_API_KEY", "") or _os.getenv("MODASH_API_KEY", "")
+    return key
+
+
+def get_meta_api_token() -> str:
+    return _RUNTIME_CONFIG.get("meta_api_token", "")
+
+
+def set_meta_api_token(token: str):
+    _RUNTIME_CONFIG["meta_api_token"] = token
+
+
 def get_openai_model() -> str:
     return _RUNTIME_CONFIG.get("openai_model", "gpt-4o")
 
@@ -135,3 +164,5 @@ def update_from_env():
     _RUNTIME_CONFIG["provider"] = AI_PROVIDER
     _RUNTIME_CONFIG["openai_key"] = OPENAI_API_KEY
     _RUNTIME_CONFIG["gemini_key"] = GEMINI_API_KEY
+    _RUNTIME_CONFIG["meta_api_key"] = META_API_KEY
+    _RUNTIME_CONFIG["meta_api_token"] = META_API_TOKEN
