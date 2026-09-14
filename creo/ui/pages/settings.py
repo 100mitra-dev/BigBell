@@ -145,7 +145,14 @@ try:
             set_meta_api_key, set_meta_api_token, set_meta_api_base_url,
             set_meta_api_version,
         )
-        from creo.config import META_API_BASE_URL, META_API_VERSION, META_API_TIMEOUT_S, META_API_PAGE_LIMIT
+        try:
+            from creo.config import META_API_BASE_URL, META_API_VERSION, META_API_TIMEOUT_S, META_API_PAGE_LIMIT
+        except ImportError:
+            import os
+            META_API_BASE_URL = os.getenv("META_API_BASE_URL", "https://graph.facebook.com")
+            META_API_VERSION = os.getenv("META_API_VERSION", "v19.0")
+            META_API_TIMEOUT_S = 15
+            META_API_PAGE_LIMIT = 100
 
         meta_key = st.text_input("Meta API key (app key)", type="password", placeholder="Meta app key...", value=st.session_state.get("meta_api_key", ""))
         meta_token = st.text_input("Meta API token (access token)", type="password", placeholder="EAAB...", value=st.session_state.get("meta_api_token", ""))

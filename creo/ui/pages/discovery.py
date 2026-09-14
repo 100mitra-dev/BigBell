@@ -2,7 +2,14 @@ import uuid
 
 import streamlit as st
 
-from creo.config import get_all_niches, get_all_languages, CONTENT_TYPES, AUDIENCE_TYPES, SORT_OPTIONS, PLATFORM_OPTIONS
+try:
+    from creo.config import get_all_niches, get_all_languages, CONTENT_TYPES, AUDIENCE_TYPES, SORT_OPTIONS, PLATFORM_OPTIONS
+except ImportError:
+    from creo.config import get_all_niches, get_all_languages
+    CONTENT_TYPES = ["ALL", "REELS", "STORIES", "POSTS", "REELS_STORIES"]
+    AUDIENCE_TYPES = ["ALL", "BUSINESS", "PERSONAL"]
+    SORT_OPTIONS = ["relevance", "followers", "engagement_rate"]
+    PLATFORM_OPTIONS = ["instagram", "facebook", "threads"]
 from creo.models import Creator, CreatorStatus, PlatformInfo
 from creo.services.creator_service import CreatorService
 from creo.services.meta_discovery import DiscoveryFilters, live_discover, mock_discover
